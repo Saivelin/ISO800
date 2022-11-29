@@ -1,8 +1,8 @@
 import telebot
-from telebot import types  # для указание типов
+from telebot import types
 import TOKEN
 from xml.etree.ElementTree import tostring
-from requests import patch, request
+# from requests import patch, request
 import sqlite3
 from pathlib import Path
 bot = telebot.TeleBot(TOKEN.token)  # токен лежит в файле config.py
@@ -17,8 +17,18 @@ bot = telebot.TeleBot(TOKEN.token)  # токен лежит в файле config
 # bot.send_message(message.chat.id, "Привет, {0.first_name}! Нажми на кнопку и перейди на сайт)".format(
 #     message.from_user), reply_markup=markup)
 startMessage = 'Вас приветствует виртуальный помощник креативного пространства ИСО800. Здесь вы можете забронировать площадку для фото и видеосъемки, арендовать технику, записаться на мероприятия и многое другое'
-CHAT_ID = -1001
+mainChatId = "@iso800nn"  # -1001595345813
 subscToCh = "Чтобы начать пользоваться ботом, необходимо быть подписанным на канал ИСО800"
+notSubText = "Не подписан"
+subText = 'Подписан'
+
+
+def check_sub_channel(chat_m):
+    print(chat_m['status'])
+    if chat_m['status'] != 'left':
+        return True
+    else:
+        return False
 
 
 @bot.message_handler(commands=['start'])
@@ -27,51 +37,16 @@ def start(message):
     # btn1 = types.KeyboardButton("👋 Поздороваться")
     # btn2 = types.KeyboardButton("❓ Задать вопрос")
     # markup.add(btn1, btn2)
+    print(message.from_user)
+    uid = message.from_user.id
+    print(uid)
+    print(bot.get_chat_member(chat_id=mainChatId, user_id=uid))
     bot.send_message(message.chat.id, text=startMessage.format(
         message.from_user))
-    # reply_markup=markup
-    if(chennelCheck() == True):
-        bot.send_message(message.chat.id, text="chennelCheck".format(
-            message.from_user))
-    else:
-        bot.send_message(message.chat.id, text=subscToCh.format(
-            message.from_user))
-
-
-def chennelCheck():
-    return True
-
-
-@bot.message_handler(content_types=['text'])
-def func(message):
-    if(message.text == "👋 Поздороваться"):
-        bot.send_message(
-            message.chat.id, text="Привеет.. Спасибо что читаешь статью!)")
-    elif(message.text == "❓ Задать вопрос"):
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        btn1 = types.KeyboardButton("Как меня зовут?")
-        btn2 = types.KeyboardButton("Что я могу?")
-        back = types.KeyboardButton("Вернуться в главное меню")
-        markup.add(btn1, btn2, back)
-        bot.send_message(
-            message.chat.id, text="Задай мне вопрос", reply_markup=markup)
-
-    elif(message.text == "Как меня зовут?"):
-        bot.send_message(message.chat.id, "У меня нет имени..")
-
-    elif message.text == "Что я могу?":
-        bot.send_message(message.chat.id, text="Поздороваться с читателями")
-
-    elif (message.text == "Вернуться в главное меню"):
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        button1 = types.KeyboardButton("👋 Поздороваться")
-        button2 = types.KeyboardButton("❓ Задать вопрос")
-        markup.add(button1, button2)
-        bot.send_message(
-            message.chat.id, text="Вы вернулись в главное меню", reply_markup=markup)
-    else:
-        bot.send_message(
-            message.chat.id, text="На такую комманду я не запрограммировал..")
+    # if check_sub_channel(bot.get_chat_member(chat_id=mainChatId, user_id=uid)):
+    #     bot.send_message(message.chat_id, text=subText)
+    # else:
+    #     bot.send_message(message.chat_id, text=notSubText)
 
 
 bot.polling(none_stop=True)
