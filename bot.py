@@ -30,11 +30,12 @@ def authorization(phone, message):
     sql.execute("SELECT phone FROM users")
     if sql.fetchone() is None:
         sql.execute("INSERT INTO users VALUES (?, ?, ?)",
-                    (message.from_user.id, phone.phone_number, 'username'))
+                    (message.from_user.id, phone.phone_number, phone.first_name))
         db.commit()
-        return False
+        return [False, phone.first_name]
     else:
-        return True
+        for value in sql.execute("SELECT * FROM users WHERE id='{message.from_user.id}'"):
+            return [True, value[2]]
 
 
 def check_sub_channel(chat_m):
@@ -76,6 +77,7 @@ def start(message):
     req = authorization(message=message, phone=message.contact)
     if req == True:
         bot.send_message(message.chat.id, text="Да, вижу тебя")
+        bot.send_message(message.chat.id, text="Привет, ")
     else:
         bot.send_message(message.chat.id, text="Не вижу тебя, заношу в бд")
 
