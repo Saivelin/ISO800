@@ -20,8 +20,21 @@ btn5txt = 'УСЛУГИ'
 btn2txttxt1 = "Аренда пространства"
 btn2txttxtsec = "Аренда оборудования"
 
-db = sqlite3.connect('bd.sqlite')
+db = sqlite3.connect('bd.sqlite', check_same_thread=False)
 sql = db.cursor()
+
+
+def authorization(phone, message):
+    print(phone)
+    print(message.from_user.id)
+    sql.execute("SELECT phone FROM users")
+    if sql.fetchone() is None:
+        sql.execute("INSERT INTO users VALUES (?, ?, ?)",
+                    (message.from_user.id, phone.phone_number, 'username'))
+        db.commit()
+        return False
+    else:
+        return True
 
 
 def check_sub_channel(chat_m):
@@ -47,8 +60,24 @@ def mainMenuBack():
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.chat.id, text=startMessage.format(
-        message.from_user), reply_markup=mainMenuBack())
+    mark = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton(
+        text="Дать свой номер телефона", request_contact=True)
+    mark.add(btn1)
+    bot.send_message(
+        message.chat.id, text="Привет! Мне нужен твой контакт, чтобы понять, знаю ли я тебя", reply_markup=mark)
+    # bot.send_message(message.chat.id, text=startMessage.format(
+    #     message.from_user), reply_markup=mainMenuBack())
+
+
+@bot.message_handler(content_types=['contact'])
+def start(message):
+    bot.send_message(message.chat.id, text="Смотрю...")
+    req = authorization(message=message, phone=message.contact)
+    if req == True:
+        bot.send_message(message.chat.id, text="Да, вижу тебя")
+    else:
+        bot.send_message(message.chat.id, text="Не вижу тебя, заношу в бд")
 
 
 @bot.message_handler(content_types=['text'])
