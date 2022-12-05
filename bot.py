@@ -34,7 +34,7 @@ def authorization(phone, message):
         db.commit()
         return [False, phone.first_name]
     else:
-        for value in sql.execute("SELECT * FROM users WHERE id='{message.from_user.id}'"):
+        for value in sql.execute(f"SELECT * FROM users WHERE id={message.from_user.id}"):
             return [True, value[2]]
 
 
@@ -67,19 +67,21 @@ def start(message):
     mark.add(btn1)
     bot.send_message(
         message.chat.id, text="Привет! Мне нужен твой контакт, чтобы понять, знаю ли я тебя", reply_markup=mark)
-    # bot.send_message(message.chat.id, text=startMessage.format(
-    #     message.from_user), reply_markup=mainMenuBack())
 
 
 @bot.message_handler(content_types=['contact'])
 def start(message):
     bot.send_message(message.chat.id, text="Смотрю...")
     req = authorization(message=message, phone=message.contact)
-    if req == True:
+    print(req)
+    if req[0] == True:
         bot.send_message(message.chat.id, text="Да, вижу тебя")
-        bot.send_message(message.chat.id, text="Привет, ")
+        bot.send_message(message.chat.id, text=f"Привет, {req[1]}")
     else:
-        bot.send_message(message.chat.id, text="Не вижу тебя, заношу в бд")
+        bot.send_message(
+            message.chat.id, text="{req[1]}, не вижу тебя, заношу в бд")
+    bot.send_message(message.chat.id, text=startMessage.format(
+        message.from_user), reply_markup=mainMenuBack())
 
 
 @bot.message_handler(content_types=['text'])
