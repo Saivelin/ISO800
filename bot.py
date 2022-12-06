@@ -1,12 +1,16 @@
-import telebot
-from telebot import types
-import TOKEN
-from xml.etree.ElementTree import tostring
-import sqlite3
 from pathlib import Path
+import sqlite3
+from xml.etree.ElementTree import tostring
+import TOKEN
+from telebot import types
+import telebot
+# coding: utf-8
+
 
 bot = telebot.TeleBot(TOKEN.token)  # токен лежит в файле config.py
 
+backtext = 'Назад'
+backtextbot = 'Возвращаю в главное меню'
 startMessage = 'Вас приветствует виртуальный помощник креативного пространства ИСО800. Здесь вы можете забронировать площадку для фото и видеосъемки, арендовать технику, записаться на мероприятия и многое другое'
 mainChatId = "@iso800nn"  # -1001595345813
 subscToCh = "Чтобы начать пользоваться ботом, необходимо быть подписанным на канал ИСО800"
@@ -19,6 +23,7 @@ btn4txt = 'КУРСЫ И МАСТЕР-КЛАССЫ'
 btn5txt = 'УСЛУГИ'
 btn2txttxt1 = "Аренда пространства"
 btn2txttxtsec = "Аренда оборудования"
+
 
 db = sqlite3.connect('bd.sqlite', check_same_thread=False)
 sql = db.cursor()
@@ -86,14 +91,20 @@ def start(message):
 
 @bot.message_handler(content_types=['text'])
 def func(message):
+    print(message.text)
+    print(backtext)
     if(message.text == btn1txt):
         bot.send_message(
             message.chat.id, text="краткая информация о пространстве с фотографиями или видео")
+    elif(message.text == backtext):
+        bot.send_message(message.chat.id, text=backtextbot,
+                         reply_markup=mainMenuBack())
     elif(message.text == btn2txt):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton(btn2txttxt1)
         btn2 = types.KeyboardButton(btn2txttxtsec)
-        markup.add(btn1, btn2)
+        btn3 = types.KeyboardButton(backtext)
+        markup.add(btn1, btn2, btn3)
         bot.send_message(
             message.chat.id, text="краткая информация о пространстве с фотографиями или видео", reply_markup=markup)
     elif(message.text == btn2txttxt1):
