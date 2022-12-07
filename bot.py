@@ -24,6 +24,8 @@ btn5txt = ['УСЛУГИ', ['Создание ролика под ключ', 'Р
                       'Работа специалиста по цветокоррекции', 'Работа моушн-дизайнера', 'Работа сценариста', 'Работа технического ассистента']]
 btn3txt = ['КИНОВЕЧЕРА И РАЗВЛЕЧЕНИЯ', ['Посиделки и киновечера часовой доступ в пространство 200 рублей, в момент киновечера 300 рублей',
                                         'Зона PS5 (300 рублей в час)', 'Зона VR (500 рублей в час)', 'Фотозона (500 рублей 30 мин)']]
+btnRename = 'Изменить имя'
+reanameTxt = 'Окей. Напиши имя, на которое ты хочешь поменять свое'
 
 db = sqlite3.connect('bd.sqlite', check_same_thread=False)
 sql = db.cursor()
@@ -58,9 +60,11 @@ def mainMenuBack():
     btn3 = types.KeyboardButton(btn3txt[0])
     btn4 = types.KeyboardButton(btn4txt)
     btn5 = types.KeyboardButton(btn5txt[0])
+    btn6 = types.KeyboardButton(btnRename)
     markup.row(btn1)
     markup.row(btn2, btn3)
     markup.row(btn4, btn5)
+    markup.row(btn6)
     return markup
 
 
@@ -74,6 +78,17 @@ def showPuncts(message, btns):
     markup.add(btn3)
     bot.send_message(
         message.chat.id, text="Что именно Вам нужно", reply_markup=markup)
+
+
+def userRename(message):
+    sql.execute(
+        f"UPDATE users SET name='{message.text}' WHERE id='{message.from_user.id}'")
+    db.commit()
+
+
+def userGetName(message):
+    for value in sql.execute(f"SELECT * FROM users WHERE id={message.from_user.id}"):
+        return [True, value[2]]
 
 
 @bot.message_handler(commands=['start'])
@@ -129,6 +144,10 @@ def func(message):
         bot.send_message(message.chat.id, text="Раздел в разработке")
     elif(message.text == btn5txt[0]):
         showPuncts(message=message, btns=btn5txt[1])
+    elif(message.text == btnRename):
+        msg = bot.send_message(message.chat.id, text='Окей, ' +
+                               userGetName(message=message)[1] + '. Какое имя ты хочешь?')
+        bot.register_next_step_handler(msg, userRename)
 
 
 bot.polling(none_stop=True)
