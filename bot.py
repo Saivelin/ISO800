@@ -19,9 +19,11 @@ subText = 'Подписан'
 btn2txt = ['АРЕНДА ПРОСТРАНСТВА И ОБОРУДОВАНИЯ',
            ['Аренда пространства', ['Белая зона (1200 рублей)', 'Зеленая зона', 'Площадка для мастер-классов', 'Корпоративы']], ['Аренда оборудования', ['Объективы', 'Камеры', 'Постоянный свет', 'Импульсный свет', 'Трансляционное оборудование', 'Стойки, штативы, стабилизация', 'Звуковое оборудование', 'Видеорекордеры']], ]
 btn1txt = 'ОБ ИСО'
-btn3txt = 'КИНОВЕЧЕРА И РАЗВЛЕЧЕНИЯ'
 btn4txt = 'КУРСЫ И МАСТЕР-КЛАССЫ'
-btn5txt = 'УСЛУГИ'
+btn5txt = ['УСЛУГИ', ['Создание ролика под ключ', 'Работа специалиста по свету (гафер)', 'Работа специалиста по 3д(UnrealEngine)', 'Работа видеографа',
+                      'Работа специалиста по цветокоррекции', 'Работа моушн-дизайнера', 'Работа сценариста', 'Работа технического ассистента']]
+btn3txt = ['КИНОВЕЧЕРА И РАЗВЛЕЧЕНИЯ', ['Посиделки и киновечера часовой доступ в пространство 200 рублей, в момент киновечера 300 рублей',
+                                        'Зона PS5 (300 рублей в час)', 'Зона VR (500 рублей в час)', 'Фотозона (500 рублей 30 мин)']]
 
 db = sqlite3.connect('bd.sqlite', check_same_thread=False)
 sql = db.cursor()
@@ -53,9 +55,9 @@ def mainMenuBack():
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton(btn1txt)
     btn2 = types.KeyboardButton(btn2txt[0])
-    btn3 = types.KeyboardButton(btn3txt)
+    btn3 = types.KeyboardButton(btn3txt[0])
     btn4 = types.KeyboardButton(btn4txt)
-    btn5 = types.KeyboardButton(btn5txt)
+    btn5 = types.KeyboardButton(btn5txt[0])
     markup.row(btn1)
     markup.row(btn2, btn3)
     markup.row(btn4, btn5)
@@ -121,15 +123,12 @@ def func(message):
         showPuncts(message=message, btns=btn2txt[1][1])
     elif(message.text == btn2txt[2][0]):
         showPuncts(message=message, btns=btn2txt[2][1])
-        # markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        # for i in btn2txt[2][1]:
-        #     print(i)
-        #     btn = types.KeyboardButton(i)
-        #     markup.add(btn)
-        # btn3 = types.KeyboardButton(backtext)
-        # markup.add(btn3)
-        # bot.send_message(
-        #     message.chat.id, text="Что именно Вам нужно", reply_markup=markup)
+    elif(message.text == btn3txt[0]):
+        showPuncts(message=message, btns=btn3txt[1])
+    elif(message.text == btn4txt):
+        bot.send_message(message.chat.id, text="Раздел в разработке")
+    elif(message.text == btn5txt[0]):
+        showPuncts(message=message, btns=btn5txt[1])
 
 
 bot.polling(none_stop=True)
