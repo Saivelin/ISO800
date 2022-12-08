@@ -4,6 +4,7 @@ from xml.etree.ElementTree import tostring
 import TOKEN
 from telebot import types
 import telebot
+import threading
 # coding: utf-8
 
 
@@ -30,15 +31,19 @@ reanameTxt = 'Окей. Напиши имя, на которое ты хочеш
 db = sqlite3.connect('bd.sqlite', check_same_thread=False)
 sql = db.cursor()
 
+lock = threading.Lock()
+
 
 def authorization(phone, message):
     print(phone)
     print(message.from_user.id)
-    sql.execute("SELECT phone FROM users")
+
+    sql.execute(f"SELECT phone FROM users WHERE id={phone.user_id}")
     if sql.fetchone() is None:
         sql.execute("INSERT INTO users VALUES (?, ?, ?)",
                     (message.from_user.id, phone.phone_number, phone.first_name))
         db.commit()
+        print(phone.first_name)
         return [False, phone.first_name]
     else:
         for value in sql.execute(f"SELECT * FROM users WHERE id={message.from_user.id}"):
@@ -102,7 +107,7 @@ def start(message):
 
 
 @bot.message_handler(content_types=['contact'])
-def start(message):
+def contact(message):
     bot.send_message(message.chat.id, text="Смотрю...")
     req = authorization(message=message, phone=message.contact)
     print(req)
@@ -111,7 +116,7 @@ def start(message):
         bot.send_message(message.chat.id, text=f"Привет, {req[1]}")
     else:
         bot.send_message(
-            message.chat.id, text="{req[1]}, не вижу тебя, заношу в бд")
+            message.chat.id, text="Не вижу тебя, заношу в бд")
     bot.send_message(message.chat.id, text=startMessage.format(
         message.from_user), reply_markup=mainMenuBack())
 
