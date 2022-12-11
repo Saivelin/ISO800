@@ -80,6 +80,14 @@ def showPuncts(message, btns):
         message.chat.id, text="Что именно Вам нужно", reply_markup=markup)
 
 
+def userCheck(message):
+    sql.execute(f"SELECT id FROM users WHERE id='{message.from_user.id}'")
+    if sql.fetchone() is None:
+        return False
+    else:
+        return True
+
+
 def userRename(message):
     sql.execute(
         f"UPDATE users SET name='{message.text}' WHERE id='{message.from_user.id}'")
@@ -89,6 +97,15 @@ def userRename(message):
 def userGetName(message):
     for value in sql.execute(f"SELECT * FROM users WHERE id={message.from_user.id}"):
         return [True, value[2]]
+
+
+def startAg(message):
+    mark = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton(
+        text="Дать свой номер телефона", request_contact=True)
+    mark.add(btn1)
+    bot.send_message(
+        message.chat.id, text="Привет! Мне нужен твой контакт, чтобы понять, знаю ли я тебя", reply_markup=mark)
 
 
 @bot.message_handler(commands=['start'])
@@ -102,7 +119,7 @@ def start(message):
 
 
 @bot.message_handler(content_types=['contact'])
-def start(message):
+def contact(message):
     bot.send_message(message.chat.id, text="Смотрю...")
     req = authorization(message=message, phone=message.contact)
     print(req)
@@ -111,7 +128,7 @@ def start(message):
         bot.send_message(message.chat.id, text=f"Привет, {req[1]}")
     else:
         bot.send_message(
-            message.chat.id, text="{req[1]}, не вижу тебя, заношу в бд")
+            message.chat.id, text="Не вижу тебя, заношу в бд")
     bot.send_message(message.chat.id, text=startMessage.format(
         message.from_user), reply_markup=mainMenuBack())
 
@@ -121,8 +138,11 @@ def func(message):
     print(message.text)
     print(backtext)
     if(message.text == btn1txt):
-        bot.send_message(
-            message.chat.id, text="краткая информация о пространстве с фотографиями или видео")
+        if(userCheck(message=message) == True):
+            bot.send_message(
+                message.chat.id, text="краткая информация о пространстве с фотографиями или видео")
+        else:
+            startAg(message=message)
     elif(message.text == backtext):
         bot.send_message(message.chat.id, text=backtextbot,
                          reply_markup=mainMenuBack())
