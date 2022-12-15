@@ -4,6 +4,7 @@ from xml.etree.ElementTree import tostring
 import TOKEN
 from telebot import types
 import telebot
+from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 # coding: utf-8
 
 
@@ -108,7 +109,7 @@ def startAg(message):
         message.chat.id, text="Привет! Мне нужен твой контакт, чтобы понять, знаю ли я тебя", reply_markup=mark)
 
 
-@bot.message_handler(commands=['start'])
+@ bot.message_handler(commands=['start'])
 def start(message):
     mark = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton(
@@ -118,7 +119,7 @@ def start(message):
         message.chat.id, text="Привет! Мне нужен твой контакт, чтобы понять, знаю ли я тебя", reply_markup=mark)
 
 
-@bot.message_handler(content_types=['contact'])
+@ bot.message_handler(content_types=['contact'])
 def contact(message):
     bot.send_message(message.chat.id, text="Смотрю...")
     req = authorization(message=message, phone=message.contact)
@@ -133,7 +134,7 @@ def contact(message):
         message.from_user), reply_markup=mainMenuBack())
 
 
-@bot.message_handler(content_types=['text'])
+@ bot.message_handler(content_types=['text'])
 def func(message):
     print(message.text)
     print(backtext)
@@ -168,6 +169,25 @@ def func(message):
         msg = bot.send_message(message.chat.id, text='Окей, ' +
                                userGetName(message=message)[1] + '. Какое имя ты хочешь?')
         bot.register_next_step_handler(msg, userRename)
+    else:
+        calendar, step = DetailedTelegramCalendar().build()
+        bot.send_message(message.chat.id,
+                         f"Select {LSTEP[step]}",
+                         reply_markup=calendar)
+
+
+@bot.callback_query_handler(func=DetailedTelegramCalendar.func())
+def cal(c):
+    result, key, step = DetailedTelegramCalendar().process(c.data)
+    if not result and key:
+        bot.edit_message_text(f"Select {LSTEP[step]}",
+                              c.message.chat.id,
+                              c.message.message_id,
+                              reply_markup=key)
+    elif result:
+        bot.edit_message_text(f"You selected {result}",
+                              c.message.chat.id,
+                              c.message.message_id)
 
 
 bot.polling(none_stop=True)
