@@ -199,12 +199,33 @@ def func(message):
                              reply_markup=calendar)
     for i in btn3txt[1]:
         if(message.text == i):
-            x = datetime.now()
+            x = datetime.now().date()
+            maxim = datetime.now().date().replace(day=1)
+            print(x.day)
+            print(x.month)
+            print(x.year)
+
+            if(x.day > 1):
+                if(x.month < 12):
+                    print(str(maxim) + "1")
+                    maxim = datetime.now().date().replace(month=x.month + 1)
+                    print(maxim)
+                else:
+                    print(str(maxim) + "2")
+                    maxim = datetime.now().date().replace(year=x.year + 1)
+                    print(maxim)
+            else:
+                print("x <= 1")
+            print(message)
             calendar, step = WMonthTelegramCalendar(
-                max_date=datetime.now().date(), min_date=datetime.now().date().replace(day=1)).build()
+                max_date=maxim, min_date=x).build()
             bot.send_message(message.chat.id,
                              f"Select {LSTEP[step]}",
                              reply_markup=calendar)
+
+
+def addDate(message):
+    return False
 
 
 @bot.callback_query_handler(func=DetailedTelegramCalendar.func())
@@ -216,9 +237,11 @@ def cal(c):
                               c.message.message_id,
                               reply_markup=key)
     elif result:
+        print(c.message.chat.id)
         bot.edit_message_text(f"Ваша дата {result}",
                               c.message.chat.id,
                               c.message.message_id)
+        bot.send_message(c.message.chat.id, text=c.text)
 
 
 bot.polling(none_stop=True)
