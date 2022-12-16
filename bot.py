@@ -216,7 +216,7 @@ def cal(c):
                               c.message.message_id,
                               reply_markup=key)
     elif result:
-        bot.edit_message_text(f"You selected {result}",
+        bot.edit_message_text(f"Ваша дата {result}",
                               c.message.chat.id,
                               c.message.message_id)
 
