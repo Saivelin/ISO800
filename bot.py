@@ -5,6 +5,7 @@ import TOKEN
 from telebot import types
 import telebot
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
+from datetime import datetime
 # coding: utf-8
 
 
@@ -30,6 +31,17 @@ reanameTxt = 'Окей. Напиши имя, на которое ты хочеш
 
 db = sqlite3.connect('bd.sqlite', check_same_thread=False)
 sql = db.cursor()
+
+
+class MyStyleCalendar(DetailedTelegramCalendar):
+    # previous and next buttons style. they are emoji now!
+    prev_button = "⬅️"
+    next_button = "➡️"
+    # you do not want empty cells when month and year are being selected
+    empty_month_button = ""
+    empty_year_button = ""
+    max_date = datetime.now()
+    min_date = datetime.today().replace(day=1)
 
 
 def authorization(phone, message):
