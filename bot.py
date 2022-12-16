@@ -216,7 +216,6 @@ def func(message):
                     print(maxim)
             else:
                 print("x <= 1")
-            print(message)
             calendar, step = WMonthTelegramCalendar(
                 max_date=maxim, min_date=x).build()
             bot.send_message(message.chat.id,
@@ -241,7 +240,7 @@ def cal(c):
         bot.edit_message_text(f"Ваша дата {result}",
                               c.message.chat.id,
                               c.message.message_id)
-        bot.send_message(c.message.chat.id, text=c.text)
+        bot.send_message(c.message.chat.id, text=c.message.text)
 
 
 bot.polling(none_stop=True)
