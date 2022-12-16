@@ -181,13 +181,30 @@ def func(message):
         msg = bot.send_message(message.chat.id, text='Окей, ' +
                                userGetName(message=message)[1] + '. Какое имя ты хочешь?')
         bot.register_next_step_handler(msg, userRename)
-    else:
-        x = datetime.now()
-        calendar, step = WMonthTelegramCalendar(
-            max_date=datetime.now().date(), min_date=datetime.now().date().replace(day=1)).build()
-        bot.send_message(message.chat.id,
-                         f"Select {LSTEP[step]}",
-                         reply_markup=calendar)
+    for i in btn2txt[1][1]:
+        if(message.text == i):
+            x = datetime.now()
+            calendar, step = WMonthTelegramCalendar(
+                max_date=datetime.now().date(), min_date=datetime.now().date().replace(day=1)).build()
+            bot.send_message(message.chat.id,
+                             f"Select {LSTEP[step]}",
+                             reply_markup=calendar)
+    for i in btn5txt[1]:
+        if(message.text == i):
+            x = datetime.now()
+            calendar, step = WMonthTelegramCalendar(
+                max_date=datetime.now().date(), min_date=datetime.now().date().replace(day=1)).build()
+            bot.send_message(message.chat.id,
+                             f"Select {LSTEP[step]}",
+                             reply_markup=calendar)
+    for i in btn3txt[1]:
+        if(message.text == i):
+            x = datetime.now()
+            calendar, step = WMonthTelegramCalendar(
+                max_date=datetime.now().date(), min_date=datetime.now().date().replace(day=1)).build()
+            bot.send_message(message.chat.id,
+                             f"Select {LSTEP[step]}",
+                             reply_markup=calendar)
 
 
 @bot.callback_query_handler(func=DetailedTelegramCalendar.func())
