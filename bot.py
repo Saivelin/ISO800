@@ -4,7 +4,7 @@ from xml.etree.ElementTree import tostring
 import TOKEN
 from telebot import types
 import telebot
-from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
+from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP, WMonthTelegramCalendar
 from datetime import datetime
 # coding: utf-8
 
@@ -182,7 +182,9 @@ def func(message):
                                userGetName(message=message)[1] + '. Какое имя ты хочешь?')
         bot.register_next_step_handler(msg, userRename)
     else:
-        calendar, step = DetailedTelegramCalendar().build()
+        x = datetime.now()
+        calendar, step = WMonthTelegramCalendar(
+            max_date=datetime.now().date(), min_date=datetime.now().date().replace(day=1)).build()
         bot.send_message(message.chat.id,
                          f"Select {LSTEP[step]}",
                          reply_markup=calendar)
