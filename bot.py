@@ -6,6 +6,7 @@ from telebot import types
 import telebot
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP, WMonthTelegramCalendar
 from datetime import datetime
+from telebot.types import LabeledPrice, ShippingOption
 # coding: utf-8
 
 
@@ -181,46 +182,28 @@ def func(message):
         msg = bot.send_message(message.chat.id, text='Окей, ' +
                                userGetName(message=message)[1] + '. Какое имя ты хочешь?')
         bot.register_next_step_handler(msg, userRename)
-    for i in btn2txt[1][1]:
-        if(message.text == i):
-            x = datetime.now()
-            calendar, step = WMonthTelegramCalendar(
-                max_date=datetime.now().date(), min_date=datetime.now().date().replace(day=1)).build()
-            bot.send_message(message.chat.id,
-                             f"Select {LSTEP[step]}",
-                             reply_markup=calendar)
-    for i in btn5txt[1]:
-        if(message.text == i):
-            x = datetime.now()
-            calendar, step = WMonthTelegramCalendar(
-                max_date=datetime.now().date(), min_date=datetime.now().date().replace(day=1)).build()
-            bot.send_message(message.chat.id,
-                             f"Select {LSTEP[step]}",
-                             reply_markup=calendar)
-    for i in btn3txt[1]:
-        if(message.text == i):
-            x = datetime.now().date()
-            maxim = datetime.now().date().replace(day=1)
-            print(x.day)
-            print(x.month)
-            print(x.year)
+    else:
+        sql.execute("SELECT * FROM items")
+        if sql.fetchone() is None:
+            print('none')
+        else:
+            for value in sql.execute("SELECT * FROM items"):
+                if(message.text == value[1]):
+                    x = datetime.now().date()
+                    maxim = datetime.now().date().replace(day=1)
 
-            if(x.day > 1):
-                if(x.month < 12):
-                    print(str(maxim) + "1")
-                    maxim = datetime.now().date().replace(month=x.month + 1)
-                    print(maxim)
-                else:
-                    print(str(maxim) + "2")
-                    maxim = datetime.now().date().replace(year=x.year + 1)
-                    print(maxim)
-            else:
-                print("x <= 1")
-            calendar, step = WMonthTelegramCalendar(
-                max_date=maxim, min_date=x).build()
-            bot.send_message(message.chat.id,
-                             f"Select {LSTEP[step]}",
-                             reply_markup=calendar)
+                    if(x.day > 1):
+                        if(x.month < 12):
+                            maxim = datetime.now().date().replace(month=x.month + 1)
+                        else:
+                            maxim = datetime.now().date().replace(year=x.year + 1)
+                    else:
+                        print("x <= 1")
+                    calendar, step = WMonthTelegramCalendar(
+                        max_date=maxim, min_date=x).build()
+                    bot.send_message(message.chat.id,
+                                     f"Select {LSTEP[step]}",
+                                     reply_markup=calendar)
 
 
 def addDate(message):
@@ -229,7 +212,17 @@ def addDate(message):
 
 @bot.callback_query_handler(func=DetailedTelegramCalendar.func())
 def cal(c):
-    result, key, step = DetailedTelegramCalendar().process(c.data)
+    x = datetime.now().date()
+    maxim = datetime.now().date().replace(day=1)
+    if(x.day > 1):
+        if(x.month < 12):
+            maxim = datetime.now().date().replace(month=x.month + 1)
+            print(maxim)
+        else:
+            maxim = datetime.now().date().replace(year=x.year + 1, month=1)
+            print(maxim)
+    result, key, step = DetailedTelegramCalendar(
+        max_date=maxim, min_date=x).process(c.data)
     if not result and key:
         bot.edit_message_text(f"Select {LSTEP[step]}",
                               c.message.chat.id,
