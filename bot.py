@@ -46,8 +46,6 @@ class MyStyleCalendar(DetailedTelegramCalendar):
 
 
 def authorization(phone, message):
-    print(phone)
-    print(message.from_user.id)
     sql.execute(f"SELECT * FROM users WHERE id={message.from_user.id}")
     if sql.fetchone() is None:
         sql.execute("INSERT INTO users VALUES (?, ?, ?)",
@@ -60,7 +58,6 @@ def authorization(phone, message):
 
 
 def check_sub_channel(chat_m):
-    print(chat_m['status'])
     if chat_m['status'] != 'left':
         return True
     else:
@@ -85,7 +82,6 @@ def mainMenuBack():
 def showPuncts(message, btns):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for i in btns:
-        print(i)
         btn = types.KeyboardButton(i)
         markup.add(btn)
     btn3 = types.KeyboardButton(backtext)
@@ -139,25 +135,17 @@ def contact(message):
     chatId = -1001595345813
     try:
         result = bot.get_chat_member(chatId, message.from_user.id)
-        print(result.status)
         if(result.status == "member" or result.status == "administrator"):
             bot.send_message(message.chat.id, text="Смотрю...")
-            print('1')
             req = authorization(message=message, phone=message.contact)
-            # print(req)
-            print('2')
             if req[0] == True:
                 bot.send_message(message.chat.id, text="Да, вижу тебя")
-                print('3')
                 bot.send_message(message.chat.id, text=f"Привет, {req[1]}")
-                print('4')
             else:
                 bot.send_message(
                     message.chat.id, text="Не вижу тебя, заношу в бд")
-                print('5')
             bot.send_message(message.chat.id, text=startMessage.format(
                 message.from_user), reply_markup=mainMenuBack())
-            print('6')
         else:
             bot.send_message(
                 message.chat.id, text="Ты наверно еще не в нашем канале. Подпишись и заходи ко мне) https://t.me/iso800nn")
@@ -168,8 +156,6 @@ def contact(message):
 
 @ bot.message_handler(content_types=['text'])
 def func(message):
-    print(message.text)
-    print(backtext)
     if(message.text == btn1txt):
         if(userCheck(message=message) == True):
             bot.send_message(
@@ -202,12 +188,9 @@ def func(message):
         reses = []
         for res in sql.execute(
                 f"SELECT * FROM appointments WHERE userid={message.from_user.id}"):
-            print(res)
             reses.append(res)
-        print(reses)
         for res in reses:
             for val in sql.execute(f"SELECT * FROM items WHERE id={res[1]}"):
-                print(val)
                 mes += f"\n" + str(val[1]) + " " + \
                     str(val[2]) + ' - ' + str(res[3])
         bot.send_message(message.chat.id, text=mes)
@@ -250,10 +233,8 @@ def cal(c):
     if(x.day > 1):
         if(x.month < 12):
             maxim = datetime.now().date().replace(month=x.month + 1)
-            print(maxim)
         else:
             maxim = datetime.now().date().replace(year=x.year + 1, month=1)
-            print(maxim)
     result, key, step = DetailedTelegramCalendar(
         max_date=maxim, min_date=x).process(c.data)
     if not result and key:
@@ -262,8 +243,6 @@ def cal(c):
                               c.message.message_id,
                               reply_markup=key)
     elif result:
-        print(c.message.chat.id)
-        print(c.message.chat.id)
         bot.edit_message_text(f"Ваша дата {result}",
                               c.message.chat.id,
                               c.message.message_id)
@@ -287,12 +266,23 @@ def cal(c):
 def buy(message):
     item = message.text.split("Снять")[1].split(".")[0]
     date = message.text.split("На")[1]
-    print(date)
-
-    bot.send_message(message.chat.id, text=message.text + " buy")
-    i = pay(message=message, item=item, date=date)
-    if(i == True):
-        return True
+    itemid = 0
+    item = " ".join(item.split())
+    bot.send_message(message.chat.id, text=item)
+    print(f"SELECT * FROM items WHERE title='{item}'")
+    for res in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
+        itemid = res[0]
+        print(res)
+    sql.execute(
+        f"SELECT * FROM appointments WHERE date='{date}' AND itemid={itemid}")
+    if sql.fetchone() is None:
+        bot.send_message(message.chat.id, text=message.text + " buy")
+        i = pay(message=message, item=item, date=date)
+        if(i == True):
+            return True
+    else:
+        bot.send_message(
+            message.chat.id, text="Здесь уже занято. Попробуй выбрать другую дату")
 
 
 def pay(message, item, date):
