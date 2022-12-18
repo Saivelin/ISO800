@@ -197,6 +197,20 @@ def func(message):
         bot.send_message(message.chat.id, text="Раздел в разработке")
     elif(message.text == btn5txt[0]):
         showPuncts(message=message, btns=btn5txt[1])
+    elif(message.text == "Мои записи"):
+        mes = ''
+        reses = []
+        for res in sql.execute(
+                f"SELECT * FROM appointments WHERE userid={message.from_user.id}"):
+            print(res)
+            reses.append(res)
+        print(reses)
+        for res in reses:
+            for val in sql.execute(f"SELECT * FROM items WHERE id={res[1]}"):
+                print(val)
+                mes += f"\n" + str(val[1]) + " " + \
+                    str(val[2]) + ' - ' + str(res[3])
+        bot.send_message(message.chat.id, text=mes)
     elif(message.text == btnRename):
         msg = bot.send_message(message.chat.id, text='Окей, ' +
                                userGetName(message=message)[1] + '. Какое имя ты хочешь?')
@@ -260,8 +274,43 @@ def cal(c):
                              text="Такого товара не существует")
         else:
             for value in sql.execute(f"SELECT * FROM items WHERE title='{c.message.text}'"):
-                bot.send_message(c.message.chat.id,
-                                 text=f"Ваш товар: {c.message.text}. Цена: {value[2]}")
+                markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                btn1 = types.KeyboardButton(
+                    "Снять " + c.message.text + ". На " + str(result))
+                btn2 = types.KeyboardButton(backtext)
+                markup.add(btn1, btn2)
+                msg = bot.send_message(c.message.chat.id,
+                                       text=f"Ваш товар: {c.message.text}. Цена: {value[2]}", reply_markup=markup)
+                bot.register_next_step_handler(msg, buy)
+
+
+def buy(message):
+    item = message.text.split("Снять")[1].split(".")[0]
+    date = message.text.split("На")[1]
+    print(date)
+
+    bot.send_message(message.chat.id, text=message.text + " buy")
+    i = pay(message=message, item=item, date=date)
+    if(i == True):
+        return True
+
+
+def pay(message, item, date):
+    # PAYMENT
+    success = True
+    if(success == True):
+        bot.send_message(
+            message.chat.id, text="Оплата прошла успешно. Записываю Вас")
+        bot.send_message(message.chat.id, text=item)
+        item = " ".join(item.split())
+        print(f"SELECT * FROM items WHERE title='{item}'")
+        for res in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
+            print("sql")
+            sql.execute("INSERT INTO appointments(itemid, userid, 'date') VALUES (?, ?, ?)",
+                        (res[0], message.from_user.id, date))
+            db.commit()
+            bot.send_message(message.chat.id, text="Вы записаны")
+            return True
 
 
 bot.polling(none_stop=True)
