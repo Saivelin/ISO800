@@ -134,17 +134,30 @@ def start(message):
 
 @ bot.message_handler(content_types=['contact'])
 def contact(message):
-    bot.send_message(message.chat.id, text="Смотрю...")
-    req = authorization(message=message, phone=message.contact)
-    print(req)
-    if req[0] == True:
-        bot.send_message(message.chat.id, text="Да, вижу тебя")
-        bot.send_message(message.chat.id, text=f"Привет, {req[1]}")
-    else:
+    userid = message.from_user.id
+    # print(userid)  # 852191502
+    chatId = -1001595345813
+    try:
+        result = bot.get_chat_member(chatId, message.from_user.id)
+        print(result.status)
+        if(result.status == "member" or result.status == "administrator"):
+            bot.send_message(message.chat.id, text="Смотрю...")
+            req = authorization(message=message, phone=message.contact)
+            # print(req)
+            if req[0] == True:
+                bot.send_message(message.chat.id, text="Да, вижу тебя")
+                bot.send_message(message.chat.id, text=f"Привет, {req[1]}")
+            else:
+                bot.send_message(
+                    message.chat.id, text="Не вижу тебя, заношу в бд")
+            bot.send_message(message.chat.id, text=startMessage.format(
+                message.from_user), reply_markup=mainMenuBack())
+        else:
+            bot.send_message(
+                message.chat.id, text="Ты наверно еще не в нашем канале. Подпишись и заходи ко мне) https://t.me/iso800nn")
+    except:
         bot.send_message(
-            message.chat.id, text="Не вижу тебя, заношу в бд")
-    bot.send_message(message.chat.id, text=startMessage.format(
-        message.from_user), reply_markup=mainMenuBack())
+            message.chat.id, text="Ты наверно еще не в нашем канале. Подпишись и заходи ко мне) https://t.me/iso800nn")
 
 
 @ bot.message_handler(content_types=['text'])
