@@ -48,7 +48,7 @@ class MyStyleCalendar(DetailedTelegramCalendar):
 def authorization(phone, message):
     print(phone)
     print(message.from_user.id)
-    sql.execute("SELECT phone FROM users")
+    sql.execute(f"SELECT * FROM users WHERE id={message.from_user.id}")
     if sql.fetchone() is None:
         sql.execute("INSERT INTO users VALUES (?, ?, ?)",
                     (message.from_user.id, phone.phone_number, phone.first_name))
@@ -142,16 +142,22 @@ def contact(message):
         print(result.status)
         if(result.status == "member" or result.status == "administrator"):
             bot.send_message(message.chat.id, text="Смотрю...")
+            print('1')
             req = authorization(message=message, phone=message.contact)
             # print(req)
+            print('2')
             if req[0] == True:
                 bot.send_message(message.chat.id, text="Да, вижу тебя")
+                print('3')
                 bot.send_message(message.chat.id, text=f"Привет, {req[1]}")
+                print('4')
             else:
                 bot.send_message(
                     message.chat.id, text="Не вижу тебя, заношу в бд")
+                print('5')
             bot.send_message(message.chat.id, text=startMessage.format(
                 message.from_user), reply_markup=mainMenuBack())
+            print('6')
         else:
             bot.send_message(
                 message.chat.id, text="Ты наверно еще не в нашем канале. Подпишись и заходи ко мне) https://t.me/iso800nn")
@@ -215,7 +221,7 @@ def func(message):
                     calendar, step = WMonthTelegramCalendar(
                         max_date=maxim, min_date=x).build()
                     bot.send_message(message.chat.id,
-                                     f"Select {LSTEP[step]}",
+                                     f"{message.text}",
                                      reply_markup=calendar)
 
 
@@ -243,10 +249,19 @@ def cal(c):
                               reply_markup=key)
     elif result:
         print(c.message.chat.id)
+        print(c.message.chat.id)
         bot.edit_message_text(f"Ваша дата {result}",
                               c.message.chat.id,
                               c.message.message_id)
         bot.send_message(c.message.chat.id, text=c.message.text)
+        sql.execute(f"SELECT * FROM items WHERE title='{c.message.text}'")
+        if sql.fetchone() is None:
+            bot.send_message(c.message.chat.id,
+                             text="Такого товара не существует")
+        else:
+            for value in sql.execute(f"SELECT * FROM items WHERE title='{c.message.text}'"):
+                bot.send_message(c.message.chat.id,
+                                 text=f"Ваш товар: {c.message.text}. Цена: {value[2]}")
 
 
 bot.polling(none_stop=True)
