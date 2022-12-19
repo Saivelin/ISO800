@@ -4,6 +4,7 @@ from xml.etree.ElementTree import tostring
 import TOKEN
 from telebot import types
 import telebot
+from telebot.types import LabeledPrice, ShippingOption
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP, WMonthTelegramCalendar
 from datetime import datetime
 from telebot.types import LabeledPrice, ShippingOption
@@ -32,6 +33,20 @@ reanameTxt = 'Окей. Напиши имя, на которое ты хочеш
 
 db = sqlite3.connect('bd.sqlite', check_same_thread=False)
 sql = db.cursor()
+
+prices = []
+
+# for val in sql.execute("SELECT * FROM items"):
+# prices.append(LabeledPrice(label=val[1], amount=val[2]))
+
+prices = [LabeledPrice(label='Working Time Machine',
+                       amount=5750), LabeledPrice('Gift wrapping', 500)]
+shipping_options = [
+    ShippingOption(id='instant', title='WorldWide Teleporter').add_price(
+        LabeledPrice('Teleporter', 1000)),
+    ShippingOption(id='pickup', title='Local pickup').add_price(LabeledPrice('Pickup', 300))]
+
+provider_token = "5966133601:AAF3RICaY1p8ShnBO_RlmA80ExtgM1SkXq0"
 
 
 class MyStyleCalendar(DetailedTelegramCalendar):
@@ -198,6 +213,11 @@ def func(message):
         msg = bot.send_message(message.chat.id, text='Окей, ' +
                                userGetName(message=message)[1] + '. Какое имя ты хочешь?')
         bot.register_next_step_handler(msg, userRename)
+    elif(message.text == "buy"):
+        bot.send_message(message.chat.id,
+                         "Buy", parse_mode='Markdown')
+        bot.send_invoice(message.chat.id, title="title", description="desc", provider_token=provider_token,
+                         invoice_payload="HAPPY FRIDAY", currency="usd", prices=prices, is_flexible=False, start_parameter='time-machine-example')
     else:
         sql.execute("SELECT * FROM items")
         if sql.fetchone() is None:
@@ -301,6 +321,29 @@ def pay(message, item, date):
             db.commit()
             bot.send_message(message.chat.id, text="Вы записаны")
             return True
+
+
+@bot.shipping_query_handler(func=lambda query: True)
+def shipping(shipping_query):
+    print(shipping_query)
+    bot.answer_shipping_query(shipping_query.id, ok=True, shipping_options=shipping_options,
+                              error_message='Oh, seems like our Dog couriers are having a lunch right now. Try again later!')
+
+
+@bot.pre_checkout_query_handler(func=lambda query: True)
+def checkout(pre_checkout_query):
+    bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True,
+                                  error_message="Aliens tried to steal your card's CVV, but we successfully protected your credentials,"
+                                                " try to pay again in a few minutes, we need a small rest.")
+
+
+@bot.message_handler(content_types=['successful_payment'])
+def got_payment(message):
+    bot.send_message(message.chat.id,
+                     'Hoooooray! Thanks for payment! We will proceed your order for `{} {}` as fast as possible! '
+                     'Stay in touch.\n\nUse /buy again to get a Time Machine for your friend!'.format(
+                         message.successful_payment.total_amount / 100, message.successful_payment.currency),
+                     parse_mode='Markdown')
 
 
 bot.polling(none_stop=True)
