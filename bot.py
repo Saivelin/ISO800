@@ -213,11 +213,6 @@ def func(message):
         msg = bot.send_message(message.chat.id, text='Окей, ' +
                                userGetName(message=message)[1] + '. Какое имя ты хочешь?')
         bot.register_next_step_handler(msg, userRename)
-    elif(message.text == "buy"):
-        bot.send_message(message.chat.id,
-                         "Buy", parse_mode='Markdown')
-        bot.send_invoice(message.chat.id, title="title", description="desc", provider_token=provider_token,
-                         invoice_payload="HAPPY FRIDAY", currency="usd", prices=prices, is_flexible=False, start_parameter='time-machine-example')
     else:
         sql.execute("SELECT * FROM items")
         if sql.fetchone() is None:
