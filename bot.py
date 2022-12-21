@@ -46,7 +46,7 @@ shipping_options = [
         LabeledPrice('Teleporter', 1000)),
     ShippingOption(id='pickup', title='Local pickup').add_price(LabeledPrice('Pickup', 300))]
 
-provider_token = "5966133601:AAF3RICaY1p8ShnBO_RlmA80ExtgM1SkXq0"
+provider_token = "381764678:TEST:47139"
 
 
 class MyStyleCalendar(DetailedTelegramCalendar):
@@ -224,7 +224,7 @@ def func(message):
             ' Want to visit your great-great-great-grandparents? Make a fortune at the races? Shake hands with Hammurabi and take a stroll in the Hanging Gardens? Order our Working Time Machine today!',  # description
             'HAPPY FRIDAYS COUPON',  # invoice_payload
             provider_token,  # provider_token
-            'usd',  # currency
+            'rub',  # currency
             prices,  # prices
             photo_url='http://erkelzaar.tsudao.com/models/perrotta/TIME_MACHINE.jpg',
             photo_height=512,  # !=0/None or picture won't be shown
