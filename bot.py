@@ -39,8 +39,12 @@ prices = []
 # for val in sql.execute("SELECT * FROM items"):
 # prices.append(LabeledPrice(label=val[1], amount=val[2]))
 
-prices = [LabeledPrice(label='Working Time Machine',
-                       amount=5750), LabeledPrice('Gift wrapping', 500)]
+# prices = [LabeledPrice(label='Working Time Machine1',
+#    amount=50750)]
+for val in sql.execute("SELECT * FROM items"):
+    prices.append(LabeledPrice(label=val[1], amount=val[2]))
+# if(val[0] == 1):
+# break
 shipping_options = [
     ShippingOption(id='instant', title='WorldWide Teleporter').add_price(
         LabeledPrice('Teleporter', 1000)),
@@ -289,17 +293,20 @@ def cal(c):
             for value in sql.execute(f"SELECT * FROM items WHERE title='{c.message.text}'"):
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
                 btn1 = types.KeyboardButton(
-                    "Снять " + c.message.text + ". На " + str(result))
+                    "Снять " + c.message.text + ". На " + str(result) + ". По цене: " + str(value[2]))
                 btn2 = types.KeyboardButton(backtext)
                 markup.add(btn1, btn2)
                 msg = bot.send_message(c.message.chat.id,
                                        text=f"Ваш товар: {c.message.text}. Цена: {value[2]}", reply_markup=markup)
+
                 bot.register_next_step_handler(msg, buy)
 
 
 def buy(message):
     item = message.text.split("Снять")[1].split(".")[0]
     date = message.text.split("На")[1]
+    pr = message.text.split("По цене: ")[1]
+    print(pr)
     itemid = 0
     item = " ".join(item.split())
     bot.send_message(message.chat.id, text=item)
@@ -311,6 +318,28 @@ def buy(message):
         f"SELECT * FROM appointments WHERE date='{date}' AND itemid={itemid}")
     if sql.fetchone() is None:
         bot.send_message(message.chat.id, text=message.text + " buy")
+        bot.send_message(message.chat.id,
+                         "Real cards won't work with me, no money will be debited from your account."
+                         " Use this test card number to pay for your Time Machine: `4242 4242 4242 4242`"
+                         "\n\nThis is your demo invoice:", parse_mode='Markdown')
+        pr = int(pr) * 100
+        print(pr)
+        prices = [LabeledPrice(
+            label=item, amount=int(pr))]
+        bot.send_invoice(
+            message.chat.id,  # chat_id
+            f"{item}",  # title
+            "desc",  # description
+            'invoice payload',  # invoice_payload
+            provider_token,  # provider_token
+            'rub',  # currency
+            prices,  # prices
+            photo_url='http://erkelzaar.tsudao.com/models/perrotta/TIME_MACHINE.jpg',
+            photo_height=512,  # !=0/None or picture won't be shown
+            photo_width=512,
+            photo_size=512,
+            is_flexible=False,  # True If you need to set up Shipping Fee
+            start_parameter='time-machine-example')
         i = pay(message=message, item=item, date=date)
         if(i == True):
             return True
@@ -337,27 +366,27 @@ def pay(message, item, date):
             return True
 
 
-@bot.shipping_query_handler(func=lambda query: True)
+@ bot.shipping_query_handler(func=lambda query: True)
 def shipping(shipping_query):
     print(shipping_query)
     bot.answer_shipping_query(shipping_query.id, ok=True, shipping_options=shipping_options,
                               error_message='Oh, seems like our Dog couriers are having a lunch right now. Try again later!')
 
 
-@bot.pre_checkout_query_handler(func=lambda query: True)
+@ bot.pre_checkout_query_handler(func=lambda query: True)
 def checkout(pre_checkout_query):
     bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True,
                                   error_message="Aliens tried to steal your card's CVV, but we successfully protected your credentials,"
                                                 " try to pay again in a few minutes, we need a small rest.")
 
 
-@bot.message_handler(content_types=['successful_payment'])
+@ bot.message_handler(content_types=['successful_payment'])
 def got_payment(message):
     bot.send_message(message.chat.id,
-                     'Hoooooray! Thanks for payment! We will proceed your order for `{} {}` as fast as possible! '
-                     'Stay in touch.\n\nUse /buy again to get a Time Machine for your friend!'.format(
+                     'Спасибо за платеж)'.format(
                          message.successful_payment.total_amount / 100, message.successful_payment.currency),
                      parse_mode='Markdown')
+    print(message)
 
 
 bot.polling(none_stop=True)
