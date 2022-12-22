@@ -340,9 +340,10 @@ def buy(message):
             photo_size=512,
             is_flexible=False,  # True If you need to set up Shipping Fee
             start_parameter='time-machine-example')
-        i = pay(message=message, item=item, date=date)
-        if(i == True):
-            return True
+        bot.register_next_step_handler(message, pay, item, date)
+        # i = pay(message=message, item=item, date=date)
+        # if(i == True):
+        # return True
     else:
         bot.send_message(
             message.chat.id, text="Здесь уже занято. Попробуй выбрать другую дату")
@@ -350,6 +351,8 @@ def buy(message):
 
 def pay(message, item, date):
     # PAYMENT
+    print('pay')
+    print(item)
     success = True
     if(success == True):
         bot.send_message(
