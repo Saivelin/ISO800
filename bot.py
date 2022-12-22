@@ -340,7 +340,7 @@ def buy(message):
             photo_size=512,
             is_flexible=False,  # True If you need to set up Shipping Fee
             start_parameter='time-machine-example')
-        bot.register_next_step_handler(message, pay, item, date)
+        bot.register_next_step_handler(message, pay, item, date, pr)
         # i = pay(message=message, item=item, date=date)
         # if(i == True):
         # return True
@@ -349,12 +349,22 @@ def buy(message):
             message.chat.id, text="Здесь уже занято. Попробуй выбрать другую дату")
 
 
-def pay(message, item, date):
+def pay(message, item, date, price):
     # PAYMENT
     print('pay')
     print(item)
-    success = True
+    print(price/100)
+    price = price/100
+    print(message)
+
+    print(f"Вы успешно перевели {price} RUB для ISO800 за {item}")
+    if(message.content_type == "successful_payment"):
+        success = True
+    else:
+        success = False
     if(success == True):
+        bot.send_message(
+            message.chat.id, text=f"Вы успешно перевели {price}0 RUB для ISO800 за {item}")
         bot.send_message(
             message.chat.id, text="Оплата прошла успешно. Записываю Вас")
         bot.send_message(message.chat.id, text=item)
