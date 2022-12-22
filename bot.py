@@ -217,25 +217,6 @@ def func(message):
         msg = bot.send_message(message.chat.id, text='Окей, ' +
                                userGetName(message=message)[1] + '. Какое имя ты хочешь?')
         bot.register_next_step_handler(msg, userRename)
-    elif(message.text == "buy"):
-        bot.send_message(message.chat.id,
-                         "Real cards won't work with me, no money will be debited from your account."
-                         " Use this test card number to pay for your Time Machine: `4242 4242 4242 4242`"
-                         "\n\nThis is your demo invoice:", parse_mode='Markdown')
-        bot.send_invoice(
-            message.chat.id,  # chat_id
-            'Working Time Machine',  # title
-            ' Want to visit your great-great-great-grandparents? Make a fortune at the races? Shake hands with Hammurabi and take a stroll in the Hanging Gardens? Order our Working Time Machine today!',  # description
-            'HAPPY FRIDAYS COUPON',  # invoice_payload
-            provider_token,  # provider_token
-            'rub',  # currency
-            prices,  # prices
-            photo_url='http://erkelzaar.tsudao.com/models/perrotta/TIME_MACHINE.jpg',
-            photo_height=512,  # !=0/None or picture won't be shown
-            photo_width=512,
-            photo_size=512,
-            is_flexible=False,  # True If you need to set up Shipping Fee
-            start_parameter='time-machine-example')
     else:
         sql.execute("SELECT * FROM items")
         if sql.fetchone() is None:
@@ -291,21 +272,50 @@ def cal(c):
                              text="Такого товара не существует")
         else:
             for value in sql.execute(f"SELECT * FROM items WHERE title='{c.message.text}'"):
+                time = 24
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                msgtext = "Снять " + c.message.text + ". На " + \
+                    str(result) + ". По цене: " + str(value[2])
+                print("Value 3 = " + str(value[3]))
+                if(value[3] == 24):
+                    msgtext += '. На час.'
+                    time = 1
+                elif(value[3] == 48):
+                    msgtext += ". На полчаса."
+                    time = 0.5
                 btn1 = types.KeyboardButton(
-                    "Снять " + c.message.text + ". На " + str(result) + ". По цене: " + str(value[2]))
+                    msgtext)
                 btn2 = types.KeyboardButton(backtext)
                 markup.add(btn1, btn2)
+                print("Value 3 = " + str(value[3]))
                 msg = bot.send_message(c.message.chat.id,
                                        text=f"Ваш товар: {c.message.text}. Цена: {value[2]}", reply_markup=markup)
 
-                bot.register_next_step_handler(msg, buy)
+                bot.register_next_step_handler(msg, timecheck, time)
 
 
-def buy(message):
+def timecheck(message, time):
+    if(time != 24):
+        if(time == 1):
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            for btns in range(1, 24):
+                btn = types.KeyboardButton(
+                    str(btns) + ":00 - " + str(btns + 1)+":00")
+                markup.add(btn)
+            btn2 = types.KeyboardButton(backtext)
+            markup.add(btn2)
+            bot.send_message(message.chat.id, text="rp", reply_markup=markup)
+        bot.register_next_step_handler(message, buy, time)
+    else:
+        buy(message, time)
+
+
+def buy(message, time):
     item = message.text.split("Снять")[1].split(".")[0]
     date = message.text.split("На")[1]
     pr = message.text.split("По цене: ")[1]
+    if(time != 24):
+        pr = pr.split(". На")[0]
     print(pr)
     itemid = 0
     item = " ".join(item.split())
