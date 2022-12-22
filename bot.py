@@ -318,10 +318,10 @@ def buy(message):
         f"SELECT * FROM appointments WHERE date='{date}' AND itemid={itemid}")
     if sql.fetchone() is None:
         bot.send_message(message.chat.id, text=message.text + " buy")
-        bot.send_message(message.chat.id,
-                         "Real cards won't work with me, no money will be debited from your account."
-                         " Use this test card number to pay for your Time Machine: `4242 4242 4242 4242`"
-                         "\n\nThis is your demo invoice:", parse_mode='Markdown')
+        # bot.send_message(message.chat.id,
+        #                  "Real cards won't work with me, no money will be debited from your account."
+        #                  " Use this test card number to pay for your Time Machine: `4242 4242 4242 4242`"
+        #                  "\n\nThis is your demo invoice:", parse_mode='Markdown')
         pr = int(pr) * 100
         print(pr)
         prices = [LabeledPrice(
