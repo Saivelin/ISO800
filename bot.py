@@ -290,30 +290,57 @@ def cal(c):
                 print("Value 3 = " + str(value[3]))
                 msg = bot.send_message(c.message.chat.id,
                                        text=f"Ваш товар: {c.message.text}. Цена: {value[2]}", reply_markup=markup)
+                itemtext = msg.text
+                bot.register_next_step_handler(msg, timecheck, time, itemtext)
 
-                bot.register_next_step_handler(msg, timecheck, time)
 
-
-def timecheck(message, time):
+def timecheck(message, time, itemtext):
+    itemtext = message.text
     if(time != 24):
         if(time == 1):
+            bot.send_message(message.chat.id, text=message.text)
+            bot.send_message(message.chat.id, text=itemtext)
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            for btns in range(1, 24):
+            for btns in range(0, 24):
                 btn = types.KeyboardButton(
                     str(btns) + ":00 - " + str(btns + 1)+":00")
                 markup.add(btn)
             btn2 = types.KeyboardButton(backtext)
             markup.add(btn2)
-            bot.send_message(message.chat.id, text="rp", reply_markup=markup)
-        bot.register_next_step_handler(message, buy, time)
+            bot.send_message(
+                message.chat.id, text="Выберите время", reply_markup=markup)
+            bot.register_next_step_handler(
+                message, buy, time, itemtext, True)
+        elif(time == 0.5):
+            bot.send_message(message.chat.id, text=message.text)
+            bot.send_message(message.chat.id, text=itemtext)
+            markup = types.ReplyKeyboardMarkup(
+                resize_keyboard=True, row_width=3)
+            for btns in range(0, 48):
+                if(btns % 2 == 0):
+                    btn = types.KeyboardButton(
+                        str(btns // 2) + ":00 - " + str(btns // 2)+":30")
+                else:
+                    btn = types.KeyboardButton(
+                        str(btns // 2) + ":30 - " + str(btns // 2 + 1)+":00")
+                markup.add(btn)
+            bot.send_message(
+                message.chat.id, text="Выберите время", reply_markup=markup)
+            bot.register_next_step_handler(
+                message, buy, time, itemtext, True)
     else:
-        buy(message, time)
+        buy(message, time, itemtext, False)
 
 
-def buy(message, time):
-    item = message.text.split("Снять")[1].split(".")[0]
-    date = message.text.split("На")[1]
-    pr = message.text.split("По цене: ")[1]
+def buy(message, time, itemtext, timed):
+    print(itemtext)
+    if(timed == False):
+        itemtext = message.text
+    else:
+        bot.send_message(message.chat.id, text=itemtext)
+    item = itemtext.split("Снять")[1].split(".")[0]
+    date = itemtext.split("На")[1]
+    pr = itemtext.split("По цене: ")[1]
     if(time != 24):
         pr = pr.split(". На")[0]
     print(pr)
@@ -328,6 +355,7 @@ def buy(message, time):
         f"SELECT * FROM appointments WHERE date='{date}' AND itemid={itemid}")
     if sql.fetchone() is None:
         bot.send_message(message.chat.id, text=message.text + " buy")
+        date += ". Время записи: " + str(message.text)
         # bot.send_message(message.chat.id,
         #                  "Real cards won't work with me, no money will be debited from your account."
         #                  " Use this test card number to pay for your Time Machine: `4242 4242 4242 4242`"
