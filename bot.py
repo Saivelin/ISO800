@@ -76,6 +76,14 @@ def authorization(phone, message):
             return [True, value[2]]
 
 
+def authSuperAdmin(id, message):
+    sql.execute(f"SELECT * FROM superadmins WHERE id='{id}'")
+    if sql.fetchone() is None:
+        return False
+    else:
+        return True
+
+
 def check_sub_channel(chat_m):
     if chat_m['status'] != 'left':
         return True
@@ -94,6 +102,16 @@ def mainMenuBack():
     markup.row(btn1)
     markup.row(btn2, btn3)
     markup.row(btn4, btn5)
+    markup.row(btn6)
+    return markup
+
+
+def superAdmMenu():
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton("Получить записи по номеру")
+    btn2 = types.KeyboardButton("Добавить администратора")
+    btn6 = types.KeyboardButton(backtext)
+    markup.row(btn1, btn2)
     markup.row(btn6)
     return markup
 
@@ -157,20 +175,50 @@ def contact(message):
         if(result.status == "member" or result.status == "administrator"):
             bot.send_message(message.chat.id, text="Смотрю...")
             req = authorization(message=message, phone=message.contact)
-            if req[0] == True:
-                bot.send_message(message.chat.id, text="Да, вижу тебя")
-                bot.send_message(message.chat.id, text=f"Привет, {req[1]}")
-            else:
+            sup = authSuperAdmin(id=message.from_user.id, message=message)
+            if(sup == False):
+                if req[0] == True:
+                    bot.send_message(message.chat.id, text="Да, вижу тебя")
+                    bot.send_message(message.chat.id, text=f"Привет, {req[1]}")
+                else:
+                    bot.send_message(
+                        message.chat.id, text="Не вижу тебя, заношу в бд")
+                bot.send_message(message.chat.id, text=startMessage.format(
+                    message.from_user), reply_markup=mainMenuBack())
+            elif(sup == True):
                 bot.send_message(
-                    message.chat.id, text="Не вижу тебя, заношу в бд")
-            bot.send_message(message.chat.id, text=startMessage.format(
-                message.from_user), reply_markup=mainMenuBack())
+                    message.chat.id, text="Привет, суперадмин", reply_markup=superAdmMenu())
         else:
             bot.send_message(
                 message.chat.id, text="Ты наверно еще не в нашем канале. Подпишись и заходи ко мне) https://t.me/iso800nn")
     except:
         bot.send_message(
             message.chat.id, text="Ты наверно еще не в нашем канале. Подпишись и заходи ко мне) https://t.me/iso800nn")
+
+
+def searchAppointmentsForPhone(message):
+    phone = message.text
+    sql.execute(f"SELECT * FROM users WHERE phone='{phone}'")
+    if sql.fetchone() is None:
+        bot.send_message(message.chat.id, text="Нет записей")
+    else:
+        id = 0
+        reses = []
+        itemsnames = []
+        mes = ''
+        for value in sql.execute(f"SELECT * FROM users WHERE phone='{phone}'"):
+            id = value[0]
+        for value in sql.execute(f"SELECT * FROM appointments WHERE userid='{id}'"):
+            reses.append(value)
+        for value in reses:
+            iid = value[1]
+            for val in sql.execute(f"SELECT * FROM items WHERE id='{iid}'"):
+                itemsnames.append(val[1])
+        i = 0
+        while i < len(reses):
+            mes += f"\n{itemsnames[i]} {reses[i][3]}"
+            i += 1
+        bot.send_message(message.chat.id, text=mes)
 
 
 @ bot.message_handler(content_types=['text'])
@@ -182,8 +230,12 @@ def func(message):
         else:
             startAg(message=message)
     elif(message.text == backtext):
-        bot.send_message(message.chat.id, text=backtextbot,
-                         reply_markup=mainMenuBack())
+        if(authSuperAdmin == False):
+            bot.send_message(message.chat.id, text=backtextbot,
+                             reply_markup=mainMenuBack())
+        else:
+            bot.send_message(message.chat.id, text=backtextbot,
+                             reply_markup=superAdmMenu())
     elif(message.text == btn2txt[0]):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton(btn2txt[1][0])
@@ -217,6 +269,12 @@ def func(message):
         msg = bot.send_message(message.chat.id, text='Окей, ' +
                                userGetName(message=message)[1] + '. Какое имя ты хочешь?')
         bot.register_next_step_handler(msg, userRename)
+    elif(message.text == "Получить записи по номеру"):
+        sup = authSuperAdmin(message=message, id=message.from_user.id)
+        if(sup == True):
+            bot.send_message(message.chat.id, text="Введите номер")
+            bot.register_next_step_handler(
+                message, searchAppointmentsForPhone)
     else:
         sql.execute("SELECT * FROM items")
         if sql.fetchone() is None:
