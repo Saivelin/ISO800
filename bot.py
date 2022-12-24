@@ -172,7 +172,8 @@ def contact(message):
     chatId = -1001595345813
     try:
         result = bot.get_chat_member(chatId, message.from_user.id)
-        if(result.status == "member" or result.status == "administrator"):
+        print(result.status)
+        if(result.status == "member" or result.status == "administrator" or result.status == "creator"):
             bot.send_message(message.chat.id, text="Смотрю...")
             req = authorization(message=message, phone=message.contact)
             sup = authSuperAdmin(id=message.from_user.id, message=message)
