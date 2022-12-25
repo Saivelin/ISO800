@@ -373,7 +373,9 @@ def timecheck(message, time, itemtext):
         elif(time == 0.5):
             bot.send_message(message.chat.id, text=message.text)
             bot.send_message(message.chat.id, text=itemtext)
-            markup = types.ReplyKeyboardMarkup()
+            markup = types.ReplyKeyboardMarkup(
+                resize_keyboard=True, row_width=3)
+            btnsarr = []
             for btns in range(0, 48):
                 if(btns % 2 == 0):
                     txt = str(btns // 2) + ":00"
@@ -383,7 +385,22 @@ def timecheck(message, time, itemtext):
                     txt = str(btns // 2) + ":30"
                     #  - " + str(btns // 2 + 1)+":00"
                     btn = types.KeyboardButton(txt)
-                markup.add(btn)
+                btnsarr.append(btn)
+                # markup.add(btn, row_width=1)
+            i = 0
+            while i <= len(btnsarr):
+                print(len(btnsarr)/3)
+                print(btnsarr[i].text, btnsarr[i+1].text, btnsarr[i+2].text)
+                if ((len(btnsarr))) % 3 != 0 and i+3 > len(btnsarr):
+                    print("text1")
+                    if(len(btnsarr % 3) == 1):
+                        print('text')
+                        markup.row(btnsarr[i])
+                    else:
+                        markup.row(btnsarr[i], btnsarr[i+1])
+                else:
+                    markup.row(btnsarr[i], btnsarr[i+1], btnsarr[i+2])
+                i += 3
             bot.send_message(
                 message.chat.id, text="Выберите время", reply_markup=markup)
             bot.register_next_step_handler(
