@@ -123,6 +123,33 @@ def superAdmMenu():
     return markup
 
 
+def addAdmin(message):
+    sql.execute("INSERT INTO admins VALUES (phone)", (message.text))
+    db.commit()
+    bot.send_message(
+        message.chat.id, text="Добавил админа с номером: " + str(message.text))
+
+
+def adminMenu(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = types.KeyboardButton("Получить записи по номеру")
+    markup.add(btn1)
+    return markup
+
+
+def adminAuth(message, phone):
+    sql.execute(
+        f"SELECT * FROM admins WHERE phone='{phone}'")
+    if sql.fetchone() is None:
+        return False
+    else:
+        for val in sql.execute(f"SELECT * FROM admins WHERE phone='{phone}'"):
+            if(val[0] == 0):
+                # Tomorrow
+                print("late")
+        return True
+
+
 def showPuncts(message, btns):
     if(message.text == "В студии"):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -196,6 +223,7 @@ def contact(message):
             bot.send_message(message.chat.id, text="Смотрю...")
             req = authorization(message=message, phone=message.contact)
             sup = authSuperAdmin(id=message.from_user.id, message=message)
+            # adm = adminAuth(message, message.contact)
             if(sup == False):
                 if req[0] == True:
                     bot.send_message(message.chat.id, text="Да, вижу тебя")
@@ -208,6 +236,8 @@ def contact(message):
             elif(sup == True):
                 bot.send_message(
                     message.chat.id, text="Привет, суперадмин", reply_markup=superAdmMenu())
+            # if(adm == True):
+                # bot.send_message(message.chat.id, text="Привет, admin")
         else:
             bot.send_message(
                 message.chat.id, text="Ты наверно еще не в нашем канале. Подпишись и заходи ко мне) https://t.me/iso800nn")
@@ -275,6 +305,11 @@ def func(message):
         bot.send_message(message.chat.id, text="Раздел в разработке")
     elif(message.text == btn5txt[0]):
         showPuncts(message=message, btns=btn5txt[1])
+    elif(message.text == "Добавить администратора"):
+        sup = authSuperAdmin(id=message.from_user.id, message=message)
+        if(sup == True):
+            bot.send_message(message.chat.id, text="Мне нужен его телефон")
+            bot.register_next_step_handler(message, addAdmin)
     elif(message.text == "Мои записи"):
         mes = ''
         reses = []
