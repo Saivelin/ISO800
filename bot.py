@@ -388,12 +388,11 @@ def timecheck(message, time, itemtext):
                 btnsarr.append(btn)
                 # markup.add(btn, row_width=1)
             i = 0
-            while i <= len(btnsarr):
-                print(len(btnsarr)/3)
+            while i < len(btnsarr):
                 print(btnsarr[i].text, btnsarr[i+1].text, btnsarr[i+2].text)
                 if ((len(btnsarr))) % 3 != 0 and i+3 > len(btnsarr):
                     print("text1")
-                    if(len(btnsarr % 3) == 1):
+                    if((len(btnsarr)+1) % 3 == 1):
                         print('text')
                         markup.row(btnsarr[i])
                     else:
