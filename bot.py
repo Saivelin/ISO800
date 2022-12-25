@@ -117,14 +117,18 @@ def superAdmMenu():
 
 
 def showPuncts(message, btns):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    for i in btns:
-        btn = types.KeyboardButton(i)
-        markup.add(btn)
-    btn3 = types.KeyboardButton(backtext)
-    markup.add(btn3)
-    bot.send_message(
-        message.chat.id, text="Что именно Вам нужно", reply_markup=markup)
+    if(message.text == "В студии"):
+        if(message.text == "В студии"):
+            print('for hours')
+    else:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        for i in btns:
+            btn = types.KeyboardButton(i)
+            markup.add(btn)
+        btn3 = types.KeyboardButton(backtext)
+        markup.add(btn3)
+        bot.send_message(
+            message.chat.id, text="Что именно Вам нужно", reply_markup=markup)
 
 
 def userCheck(message):
@@ -249,7 +253,13 @@ def func(message):
     elif(message.text == btn2txt[1][0]):
         showPuncts(message=message, btns=btn2txt[1][1])
     elif(message.text == btn2txt[2][0]):
-        showPuncts(message=message, btns=btn2txt[2][1])
+        markup = types.ReplyKeyboardMarkup()
+        markup.add(types.KeyboardButton("С собой"),
+                   types.KeyboardButton("В студии"))
+        bot.send_message(
+            message.chat.id, text="С собой (посуточно) или в студии (по часам)", reply_markup=markup)
+        bot.register_next_step_handler(message, showPuncts, btn2txt[1][1])
+        # showPuncts(message=message, btns=btn2txt[2][1])
     elif(message.text == btn3txt[0]):
         showPuncts(message=message, btns=btn3txt[1])
     elif(message.text == btn4txt):
@@ -361,11 +371,27 @@ def timecheck(message, time, itemtext):
             bot.send_message(message.chat.id, text=message.text)
             bot.send_message(message.chat.id, text=itemtext)
             markup = types.ReplyKeyboardMarkup()
+            btnsarr = []
             for btns in range(0, 24):
                 txt = str(btns) + ":00"
                 #  - " + str(btns + 1)+":00"
                 btn = types.KeyboardButton(txt)
-                markup.add(btn)
+                btnsarr.append(btn)
+                # markup.add(btn)
+            i = 0
+            while i < len(btnsarr):
+                print(btnsarr[i].text, btnsarr[i+1].text, btnsarr[i+2].text)
+                if ((len(btnsarr))) % 3 != 0 and i+3 > len(btnsarr):
+                    print("text1")
+                    if((len(btnsarr)+1) % 3 == 1):
+                        print('text')
+                        markup.row(btnsarr[i])
+                    else:
+                        markup.row(btnsarr[i], btnsarr[i+1])
+                else:
+                    markup.row(btnsarr[i], btnsarr[i+1], btnsarr[i+2])
+                i += 3
+            markup.add(backtext)
             bot.send_message(
                 message.chat.id, text="Выберите время", reply_markup=markup)
             bot.register_next_step_handler(
@@ -400,6 +426,7 @@ def timecheck(message, time, itemtext):
                 else:
                     markup.row(btnsarr[i], btnsarr[i+1], btnsarr[i+2])
                 i += 3
+            markup.add(backtext)
             bot.send_message(
                 message.chat.id, text="Выберите время", reply_markup=markup)
             bot.register_next_step_handler(
