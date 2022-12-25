@@ -36,6 +36,13 @@ sql = db.cursor()
 
 prices = []
 
+# igfg = 16
+# for v in btn2txt[2][1]:
+#     sql.execute("INSERT INTO items VALUES (?,?, ?, ?, ?)",
+#                 (igfg, v, 1000, 1, "No"))
+#     igfg += 1
+# db.commit()
+
 # for val in sql.execute("SELECT * FROM items"):
 # prices.append(LabeledPrice(label=val[1], amount=val[2]))
 
@@ -118,8 +125,15 @@ def superAdmMenu():
 
 def showPuncts(message, btns):
     if(message.text == "В студии"):
-        if(message.text == "В студии"):
-            print('for hours')
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        for i in btns:
+            btn = types.KeyboardButton(i)
+            markup.add(btn)
+        btn3 = types.KeyboardButton(backtext)
+        markup.add(btn3)
+        bot.send_message(
+            message.chat.id, text="Что именно Вам нужно", reply_markup=markup)
+        return True
     else:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         for i in btns:
@@ -129,6 +143,7 @@ def showPuncts(message, btns):
         markup.add(btn3)
         bot.send_message(
             message.chat.id, text="Что именно Вам нужно", reply_markup=markup)
+        return False
 
 
 def userCheck(message):
@@ -253,13 +268,7 @@ def func(message):
     elif(message.text == btn2txt[1][0]):
         showPuncts(message=message, btns=btn2txt[1][1])
     elif(message.text == btn2txt[2][0]):
-        markup = types.ReplyKeyboardMarkup()
-        markup.add(types.KeyboardButton("С собой"),
-                   types.KeyboardButton("В студии"))
-        bot.send_message(
-            message.chat.id, text="С собой (посуточно) или в студии (по часам)", reply_markup=markup)
-        bot.register_next_step_handler(message, showPuncts, btn2txt[1][1])
-        # showPuncts(message=message, btns=btn2txt[2][1])
+        showPuncts(message=message, btns=btn2txt[2][1])
     elif(message.text == btn3txt[0]):
         showPuncts(message=message, btns=btn3txt[1])
     elif(message.text == btn4txt):
@@ -361,11 +370,37 @@ def cal(c):
                 msg = bot.send_message(c.message.chat.id,
                                        text=f"Ваш товар: {c.message.text}. Цена: {value[2]}", reply_markup=markup)
                 itemtext = msg.text
-                bot.register_next_step_handler(msg, timecheck, time, itemtext)
+                if(value[4] == "Obr"):
+                    bot.register_next_step_handler(
+                        msg, timecheckequipment, time, itemtext, True)
+                else:
+                    bot.register_next_step_handler(
+                        msg, timecheckequipment, time, itemtext, False)
 
 
-def timecheck(message, time, itemtext):
-    itemtext = message.text
+def timecheckequipment(message, time, itemtext, equipment):
+    oldms = message.text
+    if(equipment == False):
+        timecheck(message, time, itemtext, oldms, False)
+    elif(equipment == True):
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add(types.KeyboardButton("С собой"),
+                   types.KeyboardButton("В студии"))
+        bot.send_message(
+            message.chat.id, text="С собой или посуточно?", reply_markup=markup)
+        print("FFFF")
+        bot.register_next_step_handler(
+            message, timecheck, time, itemtext, oldms, True)
+
+
+def timecheck(message, time, itemtext, oldms, eq):
+    print("timecheck")
+    if(eq == False):
+        itemtext = message.text
+    else:
+        itemtext = oldms
+    if(message.text == "В студии"):
+        time = 1
     if(time != 24):
         if(time == 1):
             bot.send_message(message.chat.id, text=message.text)
