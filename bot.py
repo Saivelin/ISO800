@@ -235,8 +235,9 @@ def func(message):
             bot.send_message(message.chat.id, text=backtextbot,
                              reply_markup=mainMenuBack())
         else:
+            # bot.send_message(message.chat.id, text=backtextbot, reply_markup=superAdmMenu())
             bot.send_message(message.chat.id, text=backtextbot,
-                             reply_markup=superAdmMenu())
+                             reply_markup=mainMenuBack())
     elif(message.text == btn2txt[0]):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton(btn2txt[1][0])
@@ -359,13 +360,12 @@ def timecheck(message, time, itemtext):
         if(time == 1):
             bot.send_message(message.chat.id, text=message.text)
             bot.send_message(message.chat.id, text=itemtext)
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            markup = types.ReplyKeyboardMarkup()
             for btns in range(0, 24):
-                btn = types.KeyboardButton(
-                    str(btns) + ":00 - " + str(btns + 1)+":00")
+                txt = str(btns) + ":00"
+                #  - " + str(btns + 1)+":00"
+                btn = types.KeyboardButton(txt)
                 markup.add(btn)
-            btn2 = types.KeyboardButton(backtext)
-            markup.add(btn2)
             bot.send_message(
                 message.chat.id, text="Выберите время", reply_markup=markup)
             bot.register_next_step_handler(
@@ -373,15 +373,16 @@ def timecheck(message, time, itemtext):
         elif(time == 0.5):
             bot.send_message(message.chat.id, text=message.text)
             bot.send_message(message.chat.id, text=itemtext)
-            markup = types.ReplyKeyboardMarkup(
-                resize_keyboard=True, row_width=3)
+            markup = types.ReplyKeyboardMarkup()
             for btns in range(0, 48):
                 if(btns % 2 == 0):
-                    btn = types.KeyboardButton(
-                        str(btns // 2) + ":00 - " + str(btns // 2)+":30")
+                    txt = str(btns // 2) + ":00"
+                    #  + str(btns // 2)+":30"
+                    btn = types.KeyboardButton(txt)
                 else:
-                    btn = types.KeyboardButton(
-                        str(btns // 2) + ":30 - " + str(btns // 2 + 1)+":00")
+                    txt = str(btns // 2) + ":30"
+                    #  - " + str(btns // 2 + 1)+":00"
+                    btn = types.KeyboardButton(txt)
                 markup.add(btn)
             bot.send_message(
                 message.chat.id, text="Выберите время", reply_markup=markup)
@@ -472,7 +473,8 @@ def pay(message, item, date, price):
             sql.execute("INSERT INTO appointments(itemid, userid, 'date') VALUES (?, ?, ?)",
                         (res[0], message.from_user.id, date))
             db.commit()
-            bot.send_message(message.chat.id, text="Вы записаны")
+            bot.send_message(message.chat.id, text="Вы записаны",
+                             reply_markup=mainMenuBack())
             return True
 
 
