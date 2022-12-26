@@ -350,6 +350,7 @@ def func(message):
                         print("x <= 1")
                     calendar, step = WMonthTelegramCalendar(
                         max_date=maxim, min_date=x).build()
+                    print(calendar[1])
                     bot.send_message(message.chat.id,
                                      f"{message.text}",
                                      reply_markup=calendar)
