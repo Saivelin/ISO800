@@ -426,6 +426,9 @@ def cal(c):
 
 
 def timecheckequipment(message, time, itemtext, equipment):
+    if(message.text == backtext):
+        mainMenuBack()
+        return False
     oldms = message.text
     if(equipment == False):
         timecheck(message, time, itemtext, oldms, False)
@@ -441,6 +444,9 @@ def timecheckequipment(message, time, itemtext, equipment):
 
 
 def timecheck(message, time, itemtext, oldms, eq):
+    if(message.text == backtext):
+        mainMenuBack()
+        return False
     print("timecheck")
     if(eq == False):
         itemtext = message.text
@@ -518,6 +524,9 @@ def timecheck(message, time, itemtext, oldms, eq):
 
 
 def buy(message, time, itemtext, timed):
+    if(message.text == backtext):
+        mainMenuBack()
+        return False
     print(itemtext)
     if(timed == False):
         itemtext = message.text
@@ -573,6 +582,9 @@ def buy(message, time, itemtext, timed):
 
 
 def pay(message, item, date, price):
+    if(message.text == backtext):
+        mainMenuBack()
+        return False
     # PAYMENT
     print('pay')
     print(item)
