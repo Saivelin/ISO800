@@ -350,7 +350,17 @@ def func(message):
                         print("x <= 1")
                     calendar, step = WMonthTelegramCalendar(
                         max_date=maxim, min_date=x).build()
-                    print(calendar[1])
+                    # print(calendar)
+                    # print(calendar.split("text"))
+                    # mains = []
+                    # for val in calendar.split("text"):
+                    #     print(val)
+                    #     try:
+                    #         int(str(val[3]) + str(val[4]))
+                    #         mains.append(str(val[3]) + str(val[4]))
+                    #     except:
+                    #         print('g')
+                    # print(mains)
                     bot.send_message(message.chat.id,
                                      f"{message.text}",
                                      reply_markup=calendar)
@@ -372,7 +382,7 @@ def cal(c):
     result, key, step = DetailedTelegramCalendar(
         max_date=maxim, min_date=x).process(c.data)
     if not result and key:
-        bot.edit_message_text(f"Select {LSTEP[step]}",
+        bot.edit_message_text(f"{c.message.text}",
                               c.message.chat.id,
                               c.message.message_id,
                               reply_markup=key)
@@ -381,6 +391,7 @@ def cal(c):
                               c.message.chat.id,
                               c.message.message_id)
         bot.send_message(c.message.chat.id, text=c.message.text)
+        print(c.message.text)
         sql.execute(f"SELECT * FROM items WHERE title='{c.message.text}'")
         if sql.fetchone() is None:
             bot.send_message(c.message.chat.id,
