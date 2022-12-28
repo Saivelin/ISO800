@@ -8,6 +8,7 @@ from telebot.types import LabeledPrice, ShippingOption
 from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP, WMonthTelegramCalendar
 from datetime import datetime
 from telebot.types import LabeledPrice, ShippingOption
+import json
 # coding: utf-8
 
 
@@ -352,15 +353,26 @@ def func(message):
                         max_date=maxim, min_date=x).build()
                     # print(calendar)
                     # print(calendar.split("text"))
-                    # mains = []
-                    # for val in calendar.split("text"):
-                    #     print(val)
-                    #     try:
-                    #         int(str(val[3]) + str(val[4]))
-                    #         mains.append(str(val[3]) + str(val[4]))
-                    #     except:
-                    #         print('g')
+                    mains = []
+                    for val in calendar.split("text"):
+                        try:
+                            int(str(val[3]) + str(val[4]))
+                            mains.append(str(val[3]) + str(val[4]))
+                        except:
+                            sf = 0
                     # print(mains)
+                    # for val in eval(calendar).items():
+                    #     print(str(val))
+                    #     for value in val:
+                    #         print(value)
+                    # data = json.dumps(calendar)
+                    cal = types.InlineKeyboardButton(
+                        text="TEXT", callback_data="33")
+                    calendar.add(cal)
+                    # data = json.loads(calendar)
+                    # print(json.dumps(calendar, sort_keys=True, indent=4))
+                    # print(data)
+                    # print(data["inline_keyboard"])
                     bot.send_message(message.chat.id,
                                      f"{message.text}",
                                      reply_markup=calendar)
