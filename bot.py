@@ -366,9 +366,9 @@ def func(message):
                     #     for value in val:
                     #         print(value)
                     # data = json.dumps(calendar)
-                    cal = types.InlineKeyboardButton(
-                        text="TEXT", callback_data="33")
-                    calendar.add(cal)
+                    # cal = types.InlineKeyboardButton(
+                        # text="TEXT", callback_data="33")
+                    # calendar.add(cal)
                     # data = json.loads(calendar)
                     # print(json.dumps(calendar, sort_keys=True, indent=4))
                     # print(data)
