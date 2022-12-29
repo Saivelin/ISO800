@@ -351,8 +351,6 @@ def func(message):
                         print("x <= 1")
                     calendar, step = WMonthTelegramCalendar(
                         max_date=maxim, min_date=x).build()
-                    # print(calendar)
-                    # print(calendar.split("text"))
                     mains = []
                     for val in calendar.split("text"):
                         try:
@@ -360,19 +358,6 @@ def func(message):
                             mains.append(str(val[3]) + str(val[4]))
                         except:
                             sf = 0
-                    # print(mains)
-                    # for val in eval(calendar).items():
-                    #     print(str(val))
-                    #     for value in val:
-                    #         print(value)
-                    # data = json.dumps(calendar)
-                    # cal = types.InlineKeyboardButton(
-                        # text="TEXT", callback_data="33")
-                    # calendar.add(cal)
-                    # data = json.loads(calendar)
-                    # print(json.dumps(calendar, sort_keys=True, indent=4))
-                    # print(data)
-                    # print(data["inline_keyboard"])
                     month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
                     iid = value[0]
@@ -391,14 +376,6 @@ def func(message):
                     daten = str(yearn) + "-" + str(mn) + '-'
                     print(daten)
                     dates = []
-                    # for illo in month:
-                    #     mn += 1
-                    #     print(calendar["inline_keyboard"]
-                    #           [6][1]["text"].split(" ")[0])
-                    #     print(mn)
-                    #     print(illo)
-                    # if vla == calendar["inline_keyboard"][6][1]["text"].split(" ")[0]:
-                    # break
                     for val in calendar["inline_keyboard"]:
                         for value in val:
                             try:
@@ -441,7 +418,7 @@ def func(message):
                             except:
                                 f = 0
                     print(calendar)
-                    calendar["inline_keyboard"][6][0]["text"] = "×"
+                    # calendar["inline_keyboard"][6][0]["text"] = "×"
                     calendar = json.dumps(calendar)
                     bot.send_message(message.chat.id,
                                      f"{message.text}",
@@ -461,13 +438,88 @@ def cal(c):
             maxim = datetime.now().date().replace(month=x.month + 1)
         else:
             maxim = datetime.now().date().replace(year=x.year + 1, month=1)
-    result, key, step = DetailedTelegramCalendar(
+    result, calendar, step = DetailedTelegramCalendar(
         max_date=maxim, min_date=x).process(c.data)
-    if not result and key:
+    if not result and calendar:
+        # for value in sql.execute("SELECT * FROM items"):
+        #     if(c.message.text == value[1]):
+        #         mains = []
+        #         for val in calendar.split("text"):
+        #             try:
+        #                 int(str(val[3]) + str(val[4]))
+        #                 mains.append(str(val[3]) + str(val[4]))
+        #             except:
+        #                 sf = 0
+        #         month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        #                  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        #         iid = value[0]
+        #         sql.execute(
+        #             f"SELECT * FROM appointments WHERE itemid='{iid}'")
+        #         data = json.loads(calendar)
+        #         calendar = json.loads(calendar)
+        #         mn = 0
+        #         yearn = calendar["inline_keyboard"][6][1]["text"].split(" ")[
+        #             1]
+        #         # print("calendar['inline_keyboard'][6][1]['text'].split('')[0]:\n " +
+        #         #   calendar["inline_keyboard"][7][1]["text"].split(" ")[0])
+        #         mntxt = ''
+        #         # for yeardtxt in calendar["inline_keyboard"]:
+        #         # for m in month:
+        #         # try:
+        #         # if yeardtxt[1]["text"] == m:
+        #         # mntxt = m
+        #         # except
+        #         for m, key in month:
+        #             if m == mntxt:
+        #                 mn = key + 1
+        #         # while mn < len(month):
+        #             # mn += 1
+        #             # if month[mn - 1] == calendar["inline_keyboard"][6][1]["text"].split(" ")[0]:
+        #                 # break
+        #         daten = str(yearn) + "-" + str(mn) + '-'
+        #         dates = []
+        #         for val in calendar["inline_keyboard"]:
+        #             for value in val:
+        #                 try:
+        #                     int(value["text"])
+        #                     dates.append(value["text"])
+        #                 except:
+        #                     f = 0
+        #         print("mn: \n" + str(mn))
+        #         for date in dates:
+        #             sql.execute(
+        #                 f"SELECT * FROM appointments WHERE itemid='{iid}'")
+        #             if sql.fetchone() is None:
+        #                 dates = []
+        #             else:
+        #                 for sqlV in sql.execute(
+        #                         f"SELECT * FROM appointments WHERE itemid='{iid}'"):
+        #                     print(sqlV[3].split('.')[0])
+        #                     print((daten + str(date)))
+        #                     if sqlV[3].split('.')[0] == (daten + str(date)):
+        #                         print('x')
+        #                     else:
+        #                         try:
+        #                             dates.remove(date)
+        #                         except:
+        #                             print("removed")
+        #         print(dates)
+        #         for val in calendar["inline_keyboard"]:
+        #             for value in val:
+        #                 try:
+        #                     int(value["text"])
+        #                     for valueel in dates:
+        #                         if value["text"] == valueel:
+        #                             value["text"] = str(
+        #                                 value["text"]) + " З"
+        #                 except:
+        #                     f = 0
+        #         # calendar["inline_keyboard"][6][0]["text"] = "×"
+        #         calendar = json.dumps(calendar)
         bot.edit_message_text(f"{c.message.text}",
                               c.message.chat.id,
                               c.message.message_id,
-                              reply_markup=key)
+                              reply_markup=calendar)
     elif result:
         bot.edit_message_text(f"Ваша дата {result}",
                               c.message.chat.id,
