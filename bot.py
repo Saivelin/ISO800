@@ -378,9 +378,7 @@ def func(message):
                     iid = value[0]
                     sql.execute(
                         f"SELECT * FROM appointments WHERE itemid='{iid}'")
-                    bot.send_message(message.chat.id, text=calendar)
                     data = json.loads(calendar)
-                    bot.send_message(message.chat.id, text=calendar)
                     calendar = json.loads(calendar)
                     mn = 0
                     yearn = calendar["inline_keyboard"][6][1]["text"].split(" ")[
@@ -419,6 +417,15 @@ def func(message):
                             else:
                                 dates.remove(date)
                     print(dates)
+                    for val in calendar["inline_keyboard"]:
+                        for value in val:
+                            try:
+                                int(value["text"])
+                                for valueel in dates:
+                                    if value["text"] == valueel:
+                                        value["text"] = value["text"] + " З"
+                            except:
+                                f = 0
                     calendar["inline_keyboard"][6][0]["text"] = "×"
                     calendar = json.dumps(calendar)
                     bot.send_message(message.chat.id,
