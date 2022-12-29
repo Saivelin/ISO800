@@ -432,7 +432,7 @@ def func(message):
                                         print(str(value["text"]) + "= +")
                                         value["text"] = str(
                                             value["text"]) + " З"
-                                        print(value["text"] + 100)
+                                        print(dates)
                             except:
                                 f = 0
                     print(calendar)
