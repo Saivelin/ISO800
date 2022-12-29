@@ -373,6 +373,17 @@ def func(message):
                     # print(json.dumps(calendar, sort_keys=True, indent=4))
                     # print(data)
                     # print(data["inline_keyboard"])
+                    bot.send_message(message.chat.id, text=calendar)
+                    print(json.loads(calendar)["inline_keyboard"])
+                    data = json.loads(calendar)
+                    bot.send_message(message.chat.id, text=calendar)
+                    print(data["inline_keyboard"][0])
+                    calendar = json.loads(calendar)
+                    for val in calendar["inline_keyboard"][0]:
+                        val["text"] = "0"
+                        print(val)
+                    calendar = json.dumps(calendar)
+                    print(calendar)
                     bot.send_message(message.chat.id,
                                      f"{message.text}",
                                      reply_markup=calendar)
