@@ -408,18 +408,23 @@ def func(message):
                                 f = 0
                     print(dates)
                     for date in dates:
-                        for sqlV in sql.execute(
-                                f"SELECT * FROM appointments WHERE itemid='{iid}'"):
-                            print(dates)
-                            print(date)
-                            print(sqlV)
-                            if sqlV[3].split('.')[0] == (daten + str(date)):
-                                print('x')
-                            else:
-                                try:
-                                    dates.remove(date)
-                                except:
-                                    print("removed")
+                        sql.execute(
+                            f"SELECT * FROM appointments WHERE itemid='{iid}'")
+                        if sql.fetchone() is None:
+                            dates = []
+                        else:
+                            for sqlV in sql.execute(
+                                    f"SELECT * FROM appointments WHERE itemid='{iid}'"):
+                                print("413: ", dates)
+                                print("414: ", date)
+                                print("415: ", sqlV)
+                                if sqlV[3].split('.')[0] == (daten + str(date)):
+                                    print('x')
+                                else:
+                                    try:
+                                        dates.remove(date)
+                                    except:
+                                        print("removed")
                     print(dates)
                     for val in calendar["inline_keyboard"]:
                         for value in val:
