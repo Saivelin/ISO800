@@ -481,6 +481,7 @@ def cal(c):
                             dates.append(value["text"])
                         except:
                             f = 0
+                baddates = []
                 for date in dates:
                     sql.execute(
                         f"SELECT * FROM appointments WHERE itemid='{iid}'")
@@ -497,17 +498,19 @@ def cal(c):
                                   sqlV[3].split('.')[0])
                             print("daten + str(date): ", daten + str(date))
                             if sqlV[3].split('.')[0] == (daten + str(date)):
-                                print('x')
+                                baddates.append(date)
                             else:
                                 try:
-                                    dates.remove(date)
+                                    print('x')
+                                    # dates.remove(date)
+                                    # baddates.append(date)
                                 except:
                                     print("removed")
                 for val in calendar["inline_keyboard"]:
                     for value in val:
                         try:
                             int(value["text"])
-                            for valueel in dates:
+                            for valueel in baddates:
                                 if value["text"] == valueel:
                                     print(str(value["text"]) + "= +")
                                     value["text"] = str(
