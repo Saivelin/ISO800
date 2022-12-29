@@ -412,20 +412,30 @@ def func(message):
                                 f"SELECT * FROM appointments WHERE itemid='{iid}'"):
                             print(dates)
                             print(date)
+                            print(sqlV)
                             if sqlV[3].split('.')[0] == (daten + str(date)):
                                 print('x')
                             else:
-                                dates.remove(date)
+                                try:
+                                    dates.remove(date)
+                                except:
+                                    print("removed")
                     print(dates)
                     for val in calendar["inline_keyboard"]:
                         for value in val:
                             try:
                                 int(value["text"])
                                 for valueel in dates:
+                                    print(valueel)
+                                    print(value["text"])
                                     if value["text"] == valueel:
-                                        value["text"] = value["text"] + " З"
+                                        print(str(value["text"]) + "= +")
+                                        value["text"] = str(
+                                            value["text"]) + " З"
+                                        print(value["text"] + 100)
                             except:
                                 f = 0
+                    print(calendar)
                     calendar["inline_keyboard"][6][0]["text"] = "×"
                     calendar = json.dumps(calendar)
                     bot.send_message(message.chat.id,
