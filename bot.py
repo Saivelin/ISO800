@@ -373,6 +373,9 @@ def func(message):
                     # print(json.dumps(calendar, sort_keys=True, indent=4))
                     # print(data)
                     # print(data["inline_keyboard"])
+                    iid = value[0]
+                    sql.execute(
+                        f"SELECT * FROM appointments WHERE iid='{iid}'")
                     bot.send_message(message.chat.id, text=calendar)
                     print(json.loads(calendar)["inline_keyboard"])
                     data = json.loads(calendar)
