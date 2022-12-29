@@ -382,6 +382,7 @@ def func(message):
                     for val in calendar["inline_keyboard"][0]:
                         val["text"] = "0"
                         print(val)
+                    calendar["inline_keyboard"][6][0]["text"] = "×"
                     calendar = json.dumps(calendar)
                     print(calendar)
                     bot.send_message(message.chat.id,
