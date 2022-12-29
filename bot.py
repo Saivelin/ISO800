@@ -373,21 +373,54 @@ def func(message):
                     # print(json.dumps(calendar, sort_keys=True, indent=4))
                     # print(data)
                     # print(data["inline_keyboard"])
+                    month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
                     iid = value[0]
                     sql.execute(
-                        f"SELECT * FROM appointments WHERE iid='{iid}'")
+                        f"SELECT * FROM appointments WHERE itemid='{iid}'")
                     bot.send_message(message.chat.id, text=calendar)
-                    print(json.loads(calendar)["inline_keyboard"])
                     data = json.loads(calendar)
                     bot.send_message(message.chat.id, text=calendar)
-                    print(data["inline_keyboard"][0])
                     calendar = json.loads(calendar)
-                    for val in calendar["inline_keyboard"][0]:
-                        val["text"] = "0"
-                        print(val)
+                    mn = 0
+                    yearn = calendar["inline_keyboard"][6][1]["text"].split(" ")[
+                        1]
+                    while mn < len(month):
+                        mn += 1
+                        if month[mn - 1] == calendar["inline_keyboard"][6][1]["text"].split(" ")[0]:
+                            break
+                    print(mn)
+                    daten = str(yearn) + "-" + str(mn) + '-'
+                    print(daten)
+                    dates = []
+                    # for illo in month:
+                    #     mn += 1
+                    #     print(calendar["inline_keyboard"]
+                    #           [6][1]["text"].split(" ")[0])
+                    #     print(mn)
+                    #     print(illo)
+                    # if vla == calendar["inline_keyboard"][6][1]["text"].split(" ")[0]:
+                    # break
+                    for val in calendar["inline_keyboard"]:
+                        for value in val:
+                            try:
+                                int(value["text"])
+                                dates.append(value["text"])
+                            except:
+                                f = 0
+                    print(dates)
+                    for date in dates:
+                        for sqlV in sql.execute(
+                                f"SELECT * FROM appointments WHERE itemid='{iid}'"):
+                            print(dates)
+                            print(date)
+                            if sqlV[3].split('.')[0] == (daten + str(date)):
+                                print('x')
+                            else:
+                                dates.remove(date)
+                    print(dates)
                     calendar["inline_keyboard"][6][0]["text"] = "×"
                     calendar = json.dumps(calendar)
-                    print(calendar)
                     bot.send_message(message.chat.id,
                                      f"{message.text}",
                                      reply_markup=calendar)
