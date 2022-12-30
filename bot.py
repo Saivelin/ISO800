@@ -372,9 +372,15 @@ def func(message):
                         mn += 1
                         if month[mn - 1] == calendar["inline_keyboard"][6][1]["text"].split(" ")[0]:
                             break
-                    print(mn)
                     daten = str(yearn) + "-" + str(mn) + '-'
-                    print(daten)
+                    for d in calendar["inline_keyboard"]:
+                        for f in d:
+                            for h in month:
+                                if str(f["text"]).split(' ')[0] == h:
+                                    yearn = str(f["text"]).split(' ')[1]
+                                    daten = str(yearn) + "-" + (str(
+                                        int(month.index(str(f["text"]).split(' ')[0])) + 1)) + '-'
+                    print("daten\n", daten)
                     dates = []
                     for val in calendar["inline_keyboard"]:
                         for value in val:
@@ -383,41 +389,45 @@ def func(message):
                                 dates.append(value["text"])
                             except:
                                 f = 0
-                    print(dates)
+                    baddates = []
                     for date in dates:
                         sql.execute(
                             f"SELECT * FROM appointments WHERE itemid='{iid}'")
+                        print("date-: ", date)
                         if sql.fetchone() is None:
                             dates = []
                         else:
                             for sqlV in sql.execute(
                                     f"SELECT * FROM appointments WHERE itemid='{iid}'"):
-                                print("413: ", dates)
-                                print("414: ", date)
-                                print("415: ", sqlV)
-                                if sqlV[3].split('.')[0] == (daten + str(date)):
-                                    print('x')
+                                print("date: ", date)
+                                print(daten + str(date))
+                                print("dates: ", dates)
+                                print("sqlV[3].split('.')[0]: ",
+                                      sqlV[3].split('.')[0])
+                                print("daten + str(date): ", daten + str(date))
+                                print((daten + str(date)).replace(' ', '') ==
+                                      (sqlV[3].split('.')[0]).replace(' ', ''))
+                                if (daten + str(date)).replace(' ', '') == (sqlV[3].split('.')[0]).replace(' ', ''):
+                                    baddates.append(date)
                                 else:
                                     try:
-                                        dates.remove(date)
+                                        print('x')
+                                        # dates.remove(date)
+                                        # baddates.append(date)
                                     except:
                                         print("removed")
-                    print(dates)
+                                print("baddates: ", baddates)
                     for val in calendar["inline_keyboard"]:
                         for value in val:
                             try:
                                 int(value["text"])
-                                for valueel in dates:
-                                    print(valueel)
-                                    print(value["text"])
+                                for valueel in baddates:
                                     if value["text"] == valueel:
                                         print(str(value["text"]) + "= +")
                                         value["text"] = str(
                                             value["text"]) + " З"
-                                        print(dates)
                             except:
                                 f = 0
-                    print(calendar)
                     # calendar["inline_keyboard"][6][0]["text"] = "×"
                     calendar = json.dumps(calendar)
                     bot.send_message(message.chat.id,
