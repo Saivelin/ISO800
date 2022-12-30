@@ -339,6 +339,9 @@ def func(message):
         else:
             for value in sql.execute("SELECT * FROM items"):
                 if(message.text == value[1]):
+                    print(value)
+                    timesForReg = value[3]
+                    obrForReg = value[4]
                     x = datetime.now().date()
                     maxim = datetime.now().date().replace(day=1)
 
@@ -380,7 +383,6 @@ def func(message):
                                     yearn = str(f["text"]).split(' ')[1]
                                     daten = str(yearn) + "-" + (str(
                                         int(month.index(str(f["text"]).split(' ')[0])) + 1)) + '-'
-                    print("daten\n", daten)
                     dates = []
                     for val in calendar["inline_keyboard"]:
                         for value in val:
@@ -393,20 +395,11 @@ def func(message):
                     for date in dates:
                         sql.execute(
                             f"SELECT * FROM appointments WHERE itemid='{iid}'")
-                        print("date-: ", date)
                         if sql.fetchone() is None:
                             dates = []
                         else:
                             for sqlV in sql.execute(
                                     f"SELECT * FROM appointments WHERE itemid='{iid}'"):
-                                print("date: ", date)
-                                print(daten + str(date))
-                                print("dates: ", dates)
-                                print("sqlV[3].split('.')[0]: ",
-                                      sqlV[3].split('.')[0])
-                                print("daten + str(date): ", daten + str(date))
-                                print((daten + str(date)).replace(' ', '') ==
-                                      (sqlV[3].split('.')[0]).replace(' ', ''))
                                 if (daten + str(date)).replace(' ', '') == (sqlV[3].split('.')[0]).replace(' ', ''):
                                     baddates.append(date)
                                 else:
@@ -416,20 +409,34 @@ def func(message):
                                         # baddates.append(date)
                                     except:
                                         print("removed")
-                                print("baddates: ", baddates)
-                    for val in calendar["inline_keyboard"]:
-                        for value in val:
-                            try:
-                                int(value["text"])
-                                for valueel in baddates:
-                                    if value["text"] == valueel:
-                                        print(str(value["text"]) + "= +")
-                                        value["text"] = str(
-                                            value["text"]) + " З"
-                            except:
-                                f = 0
+                    if timesForReg == 1 and obrForReg != 'Obr':
+                        for val in calendar["inline_keyboard"]:
+                            for value in val:
+                                try:
+                                    int(value["text"])
+                                    for valueel in baddates:
+                                        if value["text"] == valueel:
+                                            print(str(value["text"]) + "= +")
+                                            value["text"] = str(
+                                                value["text"]) + " З"
+                                            value["callback_data"] = "None"
+                                except:
+                                    f = 0
+                    elif timesForReg != 1:
+                        for val in calendar["inline_keyboard"]:
+                            for value in val:
+                                try:
+                                    int(value["text"])
+                                    for valueel in baddates:
+                                        if value["text"] == valueel:
+                                            print(str(value["text"]) + "= +")
+                                            value["text"] = str(
+                                                value["text"])
+                                except:
+                                    f = 0
                     # calendar["inline_keyboard"][6][0]["text"] = "×"
                     calendar = json.dumps(calendar)
+                    print(calendar)
                     bot.send_message(message.chat.id,
                                      f"{message.text}",
                                      reply_markup=calendar)
@@ -453,6 +460,8 @@ def cal(c):
     if not result and calendar:
         for value in sql.execute("SELECT * FROM items"):
             if(c.message.text == value[1]):
+                timesForReg = value[3]
+                obrForReg = value[4]
                 mains = []
                 for val in calendar.split("text"):
                     try:
@@ -482,7 +491,6 @@ def cal(c):
                                 yearn = str(f["text"]).split(' ')[1]
                                 daten = str(yearn) + "-" + (str(
                                     int(month.index(str(f["text"]).split(' ')[0])) + 1)) + '-'
-                print("daten\n", daten)
                 dates = []
                 for val in calendar["inline_keyboard"]:
                     for value in val:
@@ -495,20 +503,11 @@ def cal(c):
                 for date in dates:
                     sql.execute(
                         f"SELECT * FROM appointments WHERE itemid='{iid}'")
-                    print("date-: ", date)
                     if sql.fetchone() is None:
                         dates = []
                     else:
                         for sqlV in sql.execute(
                                 f"SELECT * FROM appointments WHERE itemid='{iid}'"):
-                            print("date: ", date)
-                            print(daten + str(date))
-                            print("dates: ", dates)
-                            print("sqlV[3].split('.')[0]: ",
-                                  sqlV[3].split('.')[0])
-                            print("daten + str(date): ", daten + str(date))
-                            print((daten + str(date)).replace(' ', '') ==
-                                  (sqlV[3].split('.')[0]).replace(' ', ''))
                             if (daten + str(date)).replace(' ', '') == (sqlV[3].split('.')[0]).replace(' ', ''):
                                 baddates.append(date)
                             else:
@@ -518,19 +517,31 @@ def cal(c):
                                     # baddates.append(date)
                                 except:
                                     print("removed")
-                            print("baddates: ", baddates)
-                for val in calendar["inline_keyboard"]:
-                    for value in val:
-                        try:
-                            int(value["text"])
-                            for valueel in baddates:
-                                if value["text"] == valueel:
-                                    print(str(value["text"]) + "= +")
-                                    value["text"] = str(
-                                        value["text"]) + " З"
-                        except:
-                            f = 0
-                # calendar["inline_keyboard"][6][0]["text"] = "×"
+                if timesForReg == 1 and obrForReg != 'Obr':
+                    for val in calendar["inline_keyboard"]:
+                        for value in val:
+                            try:
+                                int(value["text"])
+                                for valueel in baddates:
+                                    if value["text"] == valueel:
+                                        print(str(value["text"]) + "= +")
+                                        value["text"] = str(
+                                            value["text"]) + " З"
+                                        value["callback_data"] = "None"
+                            except:
+                                f = 0
+                elif timesForReg != 1:
+                    for val in calendar["inline_keyboard"]:
+                        for value in val:
+                            try:
+                                int(value["text"])
+                                for valueel in baddates:
+                                    if value["text"] == valueel:
+                                        print(str(value["text"]) + "= +")
+                                        value["text"] = str(
+                                            value["text"])
+                            except:
+                                f = 0
                 calendar = json.dumps(calendar)
         bot.edit_message_text(f"{c.message.text}",
                               c.message.chat.id,
