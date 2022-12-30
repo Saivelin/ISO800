@@ -497,7 +497,9 @@ def cal(c):
                             print("sqlV[3].split('.')[0]: ",
                                   sqlV[3].split('.')[0])
                             print("daten + str(date): ", daten + str(date))
-                            if sqlV[3].split('.')[0] == (daten + str(date)):
+                            print((daten + str(date)).replace(' ', '') ==
+                                  (sqlV[3].split('.')[0]).replace(' ', ''))
+                            if (daten + str(date)).replace(' ', '') == (sqlV[3].split('.')[0]).replace(' ', ''):
                                 baddates.append(date)
                             else:
                                 try:
@@ -506,6 +508,7 @@ def cal(c):
                                     # baddates.append(date)
                                 except:
                                     print("removed")
+                            print("baddates: ", baddates)
                 for val in calendar["inline_keyboard"]:
                     for value in val:
                         try:
