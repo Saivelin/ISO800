@@ -369,13 +369,15 @@ def func(message):
                     data = json.loads(calendar)
                     calendar = json.loads(calendar)
                     mn = 0
-                    yearn = calendar["inline_keyboard"][6][1]["text"].split(" ")[
-                        1]
+                    """
+                    print(calendar["inline_keyboard"][6][1]["text"])
+                    # yearn = calendar["inline_keyboard"][6][1]["text"].split(" ")[1]
                     while mn < len(month):
                         mn += 1
                         if month[mn - 1] == calendar["inline_keyboard"][6][1]["text"].split(" ")[0]:
                             break
                     daten = str(yearn) + "-" + str(mn) + '-'
+                    """
                     for d in calendar["inline_keyboard"]:
                         for f in d:
                             for h in month:
@@ -477,13 +479,14 @@ def cal(c):
                 data = json.loads(calendar)
                 calendar = json.loads(calendar)
                 mn = 0
-                yearn = calendar["inline_keyboard"][6][1]["text"].split(" ")[
-                    1]
-                while mn < len(month):
-                    mn += 1
-                    if month[mn - 1] == calendar["inline_keyboard"][6][1]["text"].split(" ")[0]:
-                        break
+                """
+                # yearn = calendar["inline_keyboard"][6][1]["text"].split(" ")[1]
+                # while mn < len(month):
+                #     mn += 1
+                #     if month[mn - 1] == calendar["inline_keyboard"][6][1]["text"].split(" ")[0]:
+                #         break
                 daten = str(yearn) + "-" + str(mn) + '-'
+                """
                 for d in calendar["inline_keyboard"]:
                     for f in d:
                         for h in month:
@@ -605,6 +608,7 @@ def timecheckequipment(message, time, itemtext, equipment):
 
 
 def timecheck(message, time, itemtext, oldms, eq):
+    print("TIMECHECK: ", message.text, time, itemtext, oldms, eq)
     if(message.text == backtext):
         mainMenuBack()
         return False
