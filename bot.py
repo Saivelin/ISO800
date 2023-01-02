@@ -735,8 +735,12 @@ def buy(message, time, itemtext, timed):
     item = " ".join(item.split())
     bot.send_message(message.chat.id, text=item)
     print(f"SELECT * FROM items WHERE title='{item}'")
+    itemdesc = ''
     for res in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
         itemid = res[0]
+        itemdesc = res[5]
+        if itemdesc == None:
+            itemdesc = ''
         print(res)
     sql.execute(
         f"SELECT * FROM appointments WHERE date='{date}' AND itemid={itemid}")
@@ -754,7 +758,7 @@ def buy(message, time, itemtext, timed):
         bot.send_invoice(
             message.chat.id,  # chat_id
             f"{item}",  # title
-            "desc",  # description
+            itemdesc,  # description
             'invoice payload',  # invoice_payload
             provider_token,  # provider_token
             'rub',  # currency
