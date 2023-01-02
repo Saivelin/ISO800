@@ -623,6 +623,16 @@ def timecheck(message, time, itemtext, oldms, eq):
     if(message.text == "В студии"):
         time = 1
     if(time != 24):
+        iid = 0
+        badtimes = []
+        for val in sql.execute(f"SELECT * FROM items WHERE title='{itemtext}'"):
+            iid = val[0]
+        for val in sql.execute(f"SELECT * FROM appointments WHERE itemid='{iid}'"):
+            print(val[3].split(".")[0])
+            print(dateMy)
+            if val[3].split(".")[0] == dateMy:
+                badtimes.append(val[3].split("Время записи: ")[1])
+        print(badtimes)
         if(time == 1):
             bot.send_message(message.chat.id, text=message.text)
             bot.send_message(message.chat.id, text=itemtext)
