@@ -644,25 +644,33 @@ def timecheck(message, time, itemtext, oldms, eq):
             bot.send_message(message.chat.id, text=itemtext)
             markup = types.ReplyKeyboardMarkup()
             btnsarr = []
+            repit = False
             for btns in range(0, 24):
                 txt = str(btns) + ":00"
                 for val in badtimes:
                     if txt == val:
                         txt = val + " (Зан)"
+                        repit = True
+                    else:
+                        repit = False
                 #  - " + str(btns + 1)+":00"
-                btn = types.KeyboardButton(txt)
-                btnsarr.append(btn)
+                if(repit == False):
+                    btn = types.KeyboardButton(txt)
+                    btnsarr.append(btn)
                 # markup.add(btn)
             i = 0
             while i < len(btnsarr):
-                print(btnsarr[i].text, btnsarr[i+1].text, btnsarr[i+2].text)
+                # print(btnsarr[i].text, btnsarr[i+1].text, btnsarr[i+2].text)
                 if ((len(btnsarr))) % 3 != 0 and i+3 > len(btnsarr):
                     print("text1")
                     if((len(btnsarr)+1) % 3 == 1):
                         print('text')
                         markup.row(btnsarr[i])
                     else:
-                        markup.row(btnsarr[i], btnsarr[i+1])
+                        try:
+                            markup.row(btnsarr[i], btnsarr[i+1])
+                        except:
+                            markup.row(btnsarr[i])
                 else:
                     markup.row(btnsarr[i], btnsarr[i+1], btnsarr[i+2])
                 i += 3
@@ -677,33 +685,47 @@ def timecheck(message, time, itemtext, oldms, eq):
             markup = types.ReplyKeyboardMarkup(
                 resize_keyboard=True, row_width=3)
             btnsarr = []
+            repit = False
+            # markup.add(btn)
             for btns in range(0, 48):
                 if(btns % 2 == 0):
                     txt = str(btns // 2) + ":00"
                     for val in badtimes:
                         if txt == val:
                             txt = val + " (Зан)"
-                    #  + str(btns // 2)+":30"
-                    btn = types.KeyboardButton(txt)
+                            repit = True
+                        else:
+                            repit = False
+                    if(repit == False):
+                        #  + str(btns // 2)+":30"
+                        btn = types.KeyboardButton(txt)
                 else:
                     txt = str(btns // 2) + ":30"
                     for val in badtimes:
                         if txt == val:
                             txt = val + " (Зан)"
-                    #  - " + str(btns // 2 + 1)+":00"
-                    btn = types.KeyboardButton(txt)
-                btnsarr.append(btn)
+                            repit = True
+                        else:
+                            repit = False
+                    if(repit == False):
+                        #  - " + str(btns // 2 + 1)+":00"
+                        btn = types.KeyboardButton(txt)
+                if(repit == False):
+                    btnsarr.append(btn)
                 # markup.add(btn, row_width=1)
             i = 0
             while i < len(btnsarr):
-                print(btnsarr[i].text, btnsarr[i+1].text, btnsarr[i+2].text)
+                # print(btnsarr[i].text, btnsarr[i+1].text, btnsarr[i+2].text)
                 if ((len(btnsarr))) % 3 != 0 and i+3 > len(btnsarr):
                     print("text1")
                     if((len(btnsarr)+1) % 3 == 1):
                         print('text')
                         markup.row(btnsarr[i])
                     else:
-                        markup.row(btnsarr[i], btnsarr[i+1])
+                        try:
+                            markup.row(btnsarr[i], btnsarr[i+1])
+                        except:
+                            markup.row(btnsarr[i])
                 else:
                     markup.row(btnsarr[i], btnsarr[i+1], btnsarr[i+2])
                 i += 3
