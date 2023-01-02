@@ -648,15 +648,18 @@ def timecheck(message, time, itemtext, oldms, eq):
             for btns in range(0, 24):
                 txt = str(btns) + ":00"
                 for val in badtimes:
+                    print(txt)
+                    print(val)
+                    print("651: ", val == txt)
                     if txt == val:
                         txt = val + " (Зан)"
                         repit = True
-                    else:
-                        repit = False
+                print("repit: ", repit)
                 #  - " + str(btns + 1)+":00"
                 if(repit == False):
                     btn = types.KeyboardButton(txt)
                     btnsarr.append(btn)
+                repit = False
                 # markup.add(btn)
             i = 0
             while i < len(btnsarr):
@@ -694,24 +697,21 @@ def timecheck(message, time, itemtext, oldms, eq):
                         if txt == val:
                             txt = val + " (Зан)"
                             repit = True
-                        else:
-                            repit = False
                     if(repit == False):
                         #  + str(btns // 2)+":30"
                         btn = types.KeyboardButton(txt)
+                    repit = False
                 else:
                     txt = str(btns // 2) + ":30"
                     for val in badtimes:
                         if txt == val:
                             txt = val + " (Зан)"
                             repit = True
-                        else:
-                            repit = False
                     if(repit == False):
                         #  - " + str(btns // 2 + 1)+":00"
                         btn = types.KeyboardButton(txt)
-                if(repit == False):
-                    btnsarr.append(btn)
+                        btnsarr.append(btn)
+                    repit = False
                 # markup.add(btn, row_width=1)
             i = 0
             while i < len(btnsarr):
