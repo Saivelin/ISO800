@@ -30,6 +30,7 @@ btn5txt = ['УСЛУГИ', ['Создание ролика под ключ', 'Р
 btn3txt = ['КИНОВЕЧЕРА И РАЗВЛЕЧЕНИЯ', ['Посиделки и киновечера часовой доступ в пространство 200 рублей, в момент киновечера 300 рублей',
                                         'Зона PS5 (300 рублей в час)', 'Зона VR (500 рублей в час)', 'Фотозона (500 рублей 30 мин)']]
 btnRename = 'Изменить имя'
+my = "Мои записи"
 reanameTxt = 'Окей. Напиши имя, на которое ты хочешь поменять свое'
 
 db = sqlite3.connect('bd.sqlite', check_same_thread=False)
@@ -107,8 +108,10 @@ def mainMenuBack():
     btn4 = types.KeyboardButton(btn4txt)
     btn5 = types.KeyboardButton(btn5txt[0])
     btn6 = types.KeyboardButton(btnRename)
+    btn7 = types.KeyboardButton(my)
     markup.row(btn1)
     markup.row(btn2, btn3)
+    markup.row(btn7)
     markup.row(btn4, btn5)
     markup.row(btn6)
     return markup
@@ -311,7 +314,7 @@ def func(message):
         if(sup == True):
             bot.send_message(message.chat.id, text="Мне нужен его телефон")
             bot.register_next_step_handler(message, addAdmin)
-    elif(message.text == "Мои записи"):
+    elif(message.text == my):
         mes = ''
         reses = []
         for res in sql.execute(
