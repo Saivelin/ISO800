@@ -625,12 +625,18 @@ def timecheck(message, time, itemtext, oldms, eq):
     if(time != 24):
         iid = 0
         badtimes = []
-        for val in sql.execute(f"SELECT * FROM items WHERE title='{itemtext}'"):
+        bot.send_message(message.chat.id, text=itemtext)
+        reqtext = itemtext.split('.')[0].split("Снять ")[1]
+        for val in sql.execute(f"SELECT * FROM items WHERE title='{reqtext}'"):
+            print(val)
             iid = val[0]
+        bot.send_message(
+            message.chat.id, text=f"iid: {iid}, reqtext: {reqtext}")
         for val in sql.execute(f"SELECT * FROM appointments WHERE itemid='{iid}'"):
+            print(val)
             print(val[3].split(".")[0])
             print(dateMy)
-            if val[3].split(".")[0] == dateMy:
+            if (val[3].split(".")[0]).replace(" ", "") == dateMy.replace(" ", ""):
                 badtimes.append(val[3].split("Время записи: ")[1])
         print(badtimes)
         if(time == 1):
@@ -640,6 +646,9 @@ def timecheck(message, time, itemtext, oldms, eq):
             btnsarr = []
             for btns in range(0, 24):
                 txt = str(btns) + ":00"
+                for val in badtimes:
+                    if txt == val:
+                        txt = val + " (Зан)"
                 #  - " + str(btns + 1)+":00"
                 btn = types.KeyboardButton(txt)
                 btnsarr.append(btn)
@@ -671,10 +680,16 @@ def timecheck(message, time, itemtext, oldms, eq):
             for btns in range(0, 48):
                 if(btns % 2 == 0):
                     txt = str(btns // 2) + ":00"
+                    for val in badtimes:
+                        if txt == val:
+                            txt = val + " (Зан)"
                     #  + str(btns // 2)+":30"
                     btn = types.KeyboardButton(txt)
                 else:
                     txt = str(btns // 2) + ":30"
+                    for val in badtimes:
+                        if txt == val:
+                            txt = val + " (Зан)"
                     #  - " + str(btns // 2 + 1)+":00"
                     btn = types.KeyboardButton(txt)
                 btnsarr.append(btn)
