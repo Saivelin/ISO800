@@ -608,7 +608,10 @@ def timecheckequipment(message, time, itemtext, equipment):
 
 
 def timecheck(message, time, itemtext, oldms, eq):
-    print("TIMECHECK: ", message.text, time, itemtext, oldms, eq)
+    dateMy = oldms.split(".")[1].split("На")[1].replace(" ", '')
+    print("DateMy: \n", dateMy)
+    print("TIMECHECK: \n",  message.text, "\n", time,
+          "\n", itemtext, "\n", oldms, "\n", eq)
     if(message.text == backtext):
         mainMenuBack()
         return False
