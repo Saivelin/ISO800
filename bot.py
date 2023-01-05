@@ -295,37 +295,77 @@ def searchAppointmentsForPhone(message):
 @ bot.message_handler(content_types=['text'])
 def func(message):
     if(message.text == btn1txt):
-        if(userCheck(message=message) == True):
+        authorization = authCheckUser(message=message)
+        if(authorization == True):
+            if(userCheck(message=message) == True):
+                bot.send_message(
+                    message.chat.id, text="краткая информация о пространстве с фотографиями или видео")
+            else:
+                startAg(message=message)
+        else:
             bot.send_message(
-                message.chat.id, text="краткая информация о пространстве с фотографиями или видео")
-        else:
-            startAg(message=message)
+                message.chat.id, text="Похоже, что-то пошло не так( Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
     elif(message.text == backtext):
-        if(authSuperAdmin == False):
-            bot.send_message(message.chat.id, text=backtextbot,
-                             reply_markup=mainMenuBack())
+        authorization = authCheckUser(message=message)
+        if(authorization == True):
+            if(authSuperAdmin == False):
+                bot.send_message(message.chat.id, text=backtextbot,
+                                 reply_markup=mainMenuBack())
+            else:
+                # bot.send_message(message.chat.id, text=backtextbot, reply_markup=superAdmMenu())
+                bot.send_message(message.chat.id, text=backtextbot,
+                                 reply_markup=mainMenuBack())
         else:
-            # bot.send_message(message.chat.id, text=backtextbot, reply_markup=superAdmMenu())
-            bot.send_message(message.chat.id, text=backtextbot,
-                             reply_markup=mainMenuBack())
+            bot.send_message(
+                message.chat.id, text="Похоже, что-то пошло не так( Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
     elif(message.text == btn2txt[0]):
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        btn1 = types.KeyboardButton(btn2txt[1][0])
-        btn2 = types.KeyboardButton(btn2txt[2][0])
-        btn3 = types.KeyboardButton(backtext)
-        markup.add(btn1, btn2, btn3)
-        bot.send_message(
-            message.chat.id, text="Пространство или обурудование?", reply_markup=markup)
+        authorization = authCheckUser(message=message)
+        if(authorization == True):
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            btn1 = types.KeyboardButton(btn2txt[1][0])
+            btn2 = types.KeyboardButton(btn2txt[2][0])
+            btn3 = types.KeyboardButton(backtext)
+            markup.add(btn1, btn2, btn3)
+            bot.send_message(
+                message.chat.id, text="Пространство или обурудование?", reply_markup=markup)
+        else:
+            bot.send_message(
+                message.chat.id, text="Похоже, что-то пошло не так( Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
     elif(message.text == btn2txt[1][0]):
-        showPuncts(message=message, btns=btn2txt[1][1])
+        authorization = authCheckUser(message=message)
+        if(authorization == True):
+            showPuncts(message=message, btns=btn2txt[1][1])
+        else:
+            bot.send_message(
+                message.chat.id, text="Похоже, что-то пошло не так( Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
     elif(message.text == btn2txt[2][0]):
-        showPuncts(message=message, btns=btn2txt[2][1])
+        authorization = authCheckUser(message=message)
+        if(authorization == True):
+            showPuncts(message=message, btns=btn2txt[2][1])
+        else:
+            bot.send_message(
+                message.chat.id, text="Похоже, что-то пошло не так( Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
     elif(message.text == btn3txt[0]):
-        showPuncts(message=message, btns=btn3txt[1])
+        authorization = authCheckUser(message=message)
+        if(authorization == True):
+            showPuncts(message=message, btns=btn3txt[1])
+        else:
+            bot.send_message(
+                message.chat.id, text="Похоже, что-то пошло не так( Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
     elif(message.text == btn4txt):
-        bot.send_message(message.chat.id, text="Раздел в разработке")
+        authorization = authCheckUser(message=message)
+        if(authorization == True):
+            bot.send_message(message.chat.id, text="Раздел в разработке")
+        else:
+            bot.send_message(
+                message.chat.id, text="Похоже, что-то пошло не так( Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
     elif(message.text == btn5txt[0]):
-        showPuncts(message=message, btns=btn5txt[1])
+        authorization = authCheckUser(message=message)
+        if(authorization == True):
+            showPuncts(message=message, btns=btn5txt[1])
+        else:
+            bot.send_message(
+                message.chat.id, text="Похоже, что-то пошло не так( Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
     elif(message.text == "Добавить администратора"):
         sup = authSuperAdmin(id=message.from_user.id, message=message)
         if(sup == True):
@@ -348,9 +388,15 @@ def func(message):
             bot.send_message(
                 message.chat.id, text="Похоже, что-то пошло не так( Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
     elif(message.text == btnRename):
-        msg = bot.send_message(message.chat.id, text='Окей, ' +
-                               userGetName(message=message)[1] + '. Какое имя ты хочешь?')
-        bot.register_next_step_handler(msg, userRename)
+        authorization = authCheckUser(message=message)
+        if(authorization == True):
+            msg = bot.send_message(message.chat.id, text='Окей, ' +
+                                   userGetName(message=message)[1] + '. Какое имя ты хочешь?')
+            bot.register_next_step_handler(msg, userRename)
+        else:
+            bot.send_message(
+                message.chat.id, text="Похоже, что-то пошло не так( Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
+
     elif(message.text == "Получить записи по номеру"):
         sup = authSuperAdmin(message=message, id=message.from_user.id)
         if(sup == True):
@@ -532,7 +578,7 @@ def cal(c):
                     else:
                         for sqlV in sql.execute(
                                 f"SELECT * FROM appointments WHERE itemid='{iid}'"):
-                            if (daten + str(date)).replace(' ', '') == (sqlV[3].split('.')[0]).replace(' ', ''):
+                            if (daten + str(date)).replace(' ', '') == (sqlV[3]):
                                 baddates.append(date)
                             else:
                                 try:
@@ -644,7 +690,7 @@ def timecheck(message, time, itemtext, oldms, eq):
             message.chat.id, text=f"iid: {iid}, reqtext: {reqtext}")
         for val in sql.execute(f"SELECT * FROM appointments WHERE itemid='{iid}'"):
             if (val[3].split(".")[0]).replace(" ", "") == dateMy.replace(" ", ""):
-                badtimes.append(val[3].split("Время записи: ")[1])
+                badtimes.append(val[5])
         if(time == 1):
             bot.send_message(message.chat.id, text=message.text)
             bot.send_message(message.chat.id, text=itemtext)
