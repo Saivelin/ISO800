@@ -761,7 +761,9 @@ def buy(message, time, itemtext, timed):
     bot.send_message(message.chat.id, text=item)
     print(f"SELECT * FROM items WHERE title='{item}'")
     itemdesc = ''
+    itemimg = ''
     for res in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
+        itemimg = res[6]
         itemid = res[0]
         itemdesc = res[5]
         if itemdesc == None:
@@ -788,7 +790,7 @@ def buy(message, time, itemtext, timed):
             provider_token,  # provider_token
             'rub',  # currency
             prices,  # prices
-            photo_url='http://erkelzaar.tsudao.com/models/perrotta/TIME_MACHINE.jpg',
+            photo_url=itemimg,
             photo_height=512,  # !=0/None or picture won't be shown
             photo_width=512,
             photo_size=512,
