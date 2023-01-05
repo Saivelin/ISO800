@@ -215,6 +215,23 @@ def start(message):
         message.chat.id, text="Привет! Мне нужен твой контакт, чтобы понять, знаю ли я тебя", reply_markup=mark)
 
 
+def authCheckUser(message):
+    print("auth")
+    userid = message.from_user.id
+    # print(userid)  # 852191502
+    chatId = -1001595345813
+    try:
+        result = bot.get_chat_member(chatId, message.from_user.id)
+        if(result.status == "member" or result.status == "administrator" or result.status == "creator"):
+            sql.execute(f"SELECT * FROM users WHERE id={message.from_user.id}")
+            if sql.fetchone() is None:
+                return False
+            else:
+                return True
+    except:
+        return False
+
+
 @ bot.message_handler(content_types=['contact'])
 def contact(message):
     userid = message.from_user.id
@@ -315,16 +332,21 @@ def func(message):
             bot.send_message(message.chat.id, text="Мне нужен его телефон")
             bot.register_next_step_handler(message, addAdmin)
     elif(message.text == my):
-        mes = ''
-        reses = []
-        for res in sql.execute(
-                f"SELECT * FROM appointments WHERE userid={message.from_user.id}"):
-            reses.append(res)
-        for res in reses:
-            for val in sql.execute(f"SELECT * FROM items WHERE id={res[1]}"):
-                mes += f"\n" + str(val[1]) + " " + \
-                    str(val[2]) + ' - ' + str(res[3])
-        bot.send_message(message.chat.id, text=mes)
+        authorization = authCheckUser(message=message)
+        if(authorization == True):
+            mes = ''
+            reses = []
+            for res in sql.execute(
+                    f"SELECT * FROM appointments WHERE userid={message.from_user.id}"):
+                reses.append(res)
+            for res in reses:
+                for val in sql.execute(f"SELECT * FROM items WHERE id={res[1]}"):
+                    mes += f"\n" + str(val[1]) + " " + \
+                        str(val[2]) + ' - ' + str(res[3])
+            bot.send_message(message.chat.id, text=mes)
+        else:
+            bot.send_message(
+                message.chat.id, text="Похоже, что-то пошло не так( Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
     elif(message.text == btnRename):
         msg = bot.send_message(message.chat.id, text='Окей, ' +
                                userGetName(message=message)[1] + '. Какое имя ты хочешь?')
@@ -342,7 +364,6 @@ def func(message):
         else:
             for value in sql.execute("SELECT * FROM items"):
                 if(message.text == value[1]):
-                    print(value)
                     timesForReg = value[3]
                     obrForReg = value[4]
                     x = datetime.now().date()
@@ -421,7 +442,6 @@ def func(message):
                                     int(value["text"])
                                     for valueel in baddates:
                                         if value["text"] == valueel:
-                                            print(str(value["text"]) + "= +")
                                             value["text"] = str(
                                                 value["text"]) + " З"
                                             value["callback_data"] = "None"
@@ -434,14 +454,12 @@ def func(message):
                                     int(value["text"])
                                     for valueel in baddates:
                                         if value["text"] == valueel:
-                                            print(str(value["text"]) + "= +")
                                             value["text"] = str(
                                                 value["text"])
                                 except:
                                     f = 0
                     # calendar["inline_keyboard"][6][0]["text"] = "×"
                     calendar = json.dumps(calendar)
-                    print(calendar)
                     bot.send_message(message.chat.id,
                                      f"{message.text}",
                                      reply_markup=calendar)
@@ -530,7 +548,6 @@ def cal(c):
                                 int(value["text"])
                                 for valueel in baddates:
                                     if value["text"] == valueel:
-                                        print(str(value["text"]) + "= +")
                                         value["text"] = str(
                                             value["text"]) + " З"
                                         value["callback_data"] = "None"
@@ -543,7 +560,6 @@ def cal(c):
                                 int(value["text"])
                                 for valueel in baddates:
                                     if value["text"] == valueel:
-                                        print(str(value["text"]) + "= +")
                                         value["text"] = str(
                                             value["text"])
                             except:
@@ -558,7 +574,6 @@ def cal(c):
                               c.message.chat.id,
                               c.message.message_id)
         bot.send_message(c.message.chat.id, text=c.message.text)
-        print(c.message.text)
         sql.execute(f"SELECT * FROM items WHERE title='{c.message.text}'")
         if sql.fetchone() is None:
             bot.send_message(c.message.chat.id,
@@ -569,7 +584,6 @@ def cal(c):
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
                 msgtext = "Снять " + c.message.text + ". На " + \
                     str(result) + ". По цене: " + str(value[2])
-                print("Value 3 = " + str(value[3]))
                 if(value[3] == 24):
                     msgtext += '. На час.'
                     time = 1
@@ -580,7 +594,6 @@ def cal(c):
                     msgtext)
                 btn2 = types.KeyboardButton(backtext)
                 markup.add(btn1, btn2)
-                print("Value 3 = " + str(value[3]))
                 msg = bot.send_message(c.message.chat.id,
                                        text=f"Ваш товар: {c.message.text}. Цена: {value[2]}", reply_markup=markup)
                 itemtext = msg.text
@@ -605,20 +618,15 @@ def timecheckequipment(message, time, itemtext, equipment):
                    types.KeyboardButton("В студии"))
         bot.send_message(
             message.chat.id, text="С собой или посуточно?", reply_markup=markup)
-        print("FFFF")
         bot.register_next_step_handler(
             message, timecheck, time, itemtext, oldms, True)
 
 
 def timecheck(message, time, itemtext, oldms, eq):
     dateMy = oldms.split(".")[1].split("На")[1].replace(" ", '')
-    print("DateMy: \n", dateMy)
-    print("TIMECHECK: \n",  message.text, "\n", time,
-          "\n", itemtext, "\n", oldms, "\n", eq)
     if(message.text == backtext):
         mainMenuBack()
         return False
-    print("timecheck")
     if(eq == False):
         itemtext = message.text
     else:
@@ -631,17 +639,12 @@ def timecheck(message, time, itemtext, oldms, eq):
         bot.send_message(message.chat.id, text=itemtext)
         reqtext = itemtext.split('.')[0].split("Снять ")[1]
         for val in sql.execute(f"SELECT * FROM items WHERE title='{reqtext}'"):
-            print(val)
             iid = val[0]
         bot.send_message(
             message.chat.id, text=f"iid: {iid}, reqtext: {reqtext}")
         for val in sql.execute(f"SELECT * FROM appointments WHERE itemid='{iid}'"):
-            print(val)
-            print(val[3].split(".")[0])
-            print(dateMy)
             if (val[3].split(".")[0]).replace(" ", "") == dateMy.replace(" ", ""):
                 badtimes.append(val[3].split("Время записи: ")[1])
-        print(badtimes)
         if(time == 1):
             bot.send_message(message.chat.id, text=message.text)
             bot.send_message(message.chat.id, text=itemtext)
@@ -651,13 +654,9 @@ def timecheck(message, time, itemtext, oldms, eq):
             for btns in range(0, 24):
                 txt = str(btns) + ":00"
                 for val in badtimes:
-                    print(txt)
-                    print(val)
-                    print("651: ", val == txt)
                     if txt == val:
                         txt = val + " (Зан)"
                         repit = True
-                print("repit: ", repit)
                 #  - " + str(btns + 1)+":00"
                 if(repit == False):
                     btn = types.KeyboardButton(txt)
@@ -668,9 +667,7 @@ def timecheck(message, time, itemtext, oldms, eq):
             while i < len(btnsarr):
                 # print(btnsarr[i].text, btnsarr[i+1].text, btnsarr[i+2].text)
                 if ((len(btnsarr))) % 3 != 0 and i+3 > len(btnsarr):
-                    print("text1")
                     if((len(btnsarr)+1) % 3 == 1):
-                        print('text')
                         markup.row(btnsarr[i])
                     else:
                         try:
@@ -720,9 +717,7 @@ def timecheck(message, time, itemtext, oldms, eq):
             while i < len(btnsarr):
                 # print(btnsarr[i].text, btnsarr[i+1].text, btnsarr[i+2].text)
                 if ((len(btnsarr))) % 3 != 0 and i+3 > len(btnsarr):
-                    print("text1")
                     if((len(btnsarr)+1) % 3 == 1):
-                        print('text')
                         markup.row(btnsarr[i])
                     else:
                         try:
@@ -755,11 +750,9 @@ def buy(message, time, itemtext, timed):
     pr = itemtext.split("По цене: ")[1]
     if(time != 24):
         pr = pr.split(". На")[0]
-    print(pr)
     itemid = 0
     item = " ".join(item.split())
     bot.send_message(message.chat.id, text=item)
-    print(f"SELECT * FROM items WHERE title='{item}'")
     itemdesc = ''
     itemimg = ''
     for res in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
@@ -768,7 +761,6 @@ def buy(message, time, itemtext, timed):
         itemdesc = res[5]
         if itemdesc == None:
             itemdesc = ''
-        print(res)
     sql.execute(
         f"SELECT * FROM appointments WHERE date='{date}' AND itemid={itemid}")
     if sql.fetchone() is None:
@@ -779,7 +771,6 @@ def buy(message, time, itemtext, timed):
         #                  " Use this test card number to pay for your Time Machine: `4242 4242 4242 4242`"
         #                  "\n\nThis is your demo invoice:", parse_mode='Markdown')
         pr = int(pr) * 100
-        print(pr)
         prices = [LabeledPrice(
             label=item, amount=int(pr))]
         bot.send_invoice(
@@ -810,11 +801,7 @@ def pay(message, item, date, price):
         mainMenuBack()
         return False
     # PAYMENT
-    print('pay')
-    print(item)
-    print(price/100)
     price = price/100
-    print(message)
 
     print(f"Вы успешно перевели {price} RUB для ISO800 за {item}")
     if(message.content_type == "successful_payment"):
@@ -828,11 +815,9 @@ def pay(message, item, date, price):
             message.chat.id, text="Оплата прошла успешно. Записываю Вас")
         bot.send_message(message.chat.id, text=item)
         item = " ".join(item.split())
-        print(f"SELECT * FROM items WHERE title='{item}'")
         for res in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
-            print("sql")
-            sql.execute("INSERT INTO appointments(itemid, userid, 'date') VALUES (?, ?, ?)",
-                        (res[0], message.from_user.id, date))
+            sql.execute("INSERT INTO appointments(itemid, userid, 'date', price) VALUES (?, ?, ?, ?)",
+                        (res[0], message.from_user.id, date, price))
             db.commit()
             bot.send_message(message.chat.id, text="Вы записаны",
                              reply_markup=mainMenuBack())
