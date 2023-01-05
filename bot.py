@@ -681,7 +681,7 @@ def timecheck(message, time, itemtext, oldms, eq):
             bot.send_message(
                 message.chat.id, text="Выберите время", reply_markup=markup)
             bot.register_next_step_handler(
-                message, buy, time, itemtext, True)
+                message, buy, time, itemtext, True, eq, oldms)
         elif(time == 0.5):
             bot.send_message(message.chat.id, text=message.text)
             bot.send_message(message.chat.id, text=itemtext)
@@ -731,12 +731,15 @@ def timecheck(message, time, itemtext, oldms, eq):
             bot.send_message(
                 message.chat.id, text="Выберите время", reply_markup=markup)
             bot.register_next_step_handler(
-                message, buy, time, itemtext, True)
+                message, buy, time, itemtext, True, eq, oldms)
     else:
-        buy(message, time, itemtext, False)
+        buy(message, time, itemtext, False, eq, oldms)
 
 
-def buy(message, time, itemtext, timed):
+def buy(message, time, itemtext, timed, eq, oldms):
+    print(eq)
+    print(oldms)
+
     if(message.text == backtext):
         mainMenuBack()
         return False
@@ -745,6 +748,10 @@ def buy(message, time, itemtext, timed):
         itemtext = message.text
     else:
         bot.send_message(message.chat.id, text=itemtext)
+    if(eq == True):
+        itemtext = oldms
+    print(itemtext)
+    bot.send_message(message.chat.id, text=itemtext)
     item = itemtext.split("Снять")[1].split(".")[0]
     date = itemtext.split("На")[1]
     pr = itemtext.split("По цене: ")[1]
@@ -814,10 +821,14 @@ def pay(message, item, date, price):
         bot.send_message(
             message.chat.id, text="Оплата прошла успешно. Записываю Вас")
         bot.send_message(message.chat.id, text=item)
+        datereal = date.split(".")[0].replace(' ', '')
+        time = date.split("Время записи: ")[1]
+        print(date.split(".")[0])
+        print(date.split("-")[1])
         item = " ".join(item.split())
         for res in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
-            sql.execute("INSERT INTO appointments(itemid, userid, 'date', price) VALUES (?, ?, ?, ?)",
-                        (res[0], message.from_user.id, date, price))
+            sql.execute("INSERT INTO appointments(itemid, userid, 'date', price, 'time') VALUES (?, ?, ?, ?, ?)",
+                        (res[0], message.from_user.id, datereal, price, time))
             db.commit()
             bot.send_message(message.chat.id, text="Вы записаны",
                              reply_markup=mainMenuBack())
