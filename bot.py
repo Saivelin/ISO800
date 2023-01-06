@@ -86,39 +86,49 @@ def authorization(phone, message):
             return [True, value[2]]
 
 
+def mainMenuBackBack(message):
+    markup = mainMenuBack()
+    bot.send_message(
+        message.chat.id, text="Возвращаю в главное меню", reply_markup=markup)
+
+
 def cancel(message):
-    try:
-        item = message.text.split(".")[0]
-        date = message.text.split(".")[1]
-        time = message.text.split(".")[2]
-        if(date[0] == ' '):
-            date = date[1:]
-        if(time[0] == ' '):
-            time = time[1:]
-        sql.execute(
-            f"SELECT * FROM appointments WHERE date='{date}' AND time='{time}'")
-        print("SUCH")
-        if sql.fetchone() is None:
-            bot.send_message(message.chat.id, text="Что то пошло не так")
-            mainMenuBack()
-        else:
-            iid = 0
-            ourapps = []
-            for val in sql.execute(f"SELECT * FROM appointments WHERE date='{date}' AND time='{time}'"):
-                ourapps.append(val)
-            for sqlo in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
-                iid = sqlo[0]
-            for val in ourapps:
-                if(iid == val[1] and date == val[3] and time == val[5] and val[7] == 0):
-                    print("calncel: ", val)
-                    appid = val[0]
-                    sql.execute(
-                        f"UPDATE appointments SET cancelled=1 WHERE id='{appid}'")
-                    db.commit()
-                    bot.send_message(message.chat.id, text="Запись отменена")
-                    mainMenuBack()
-    except:
-        mainMenuBack()
+    if(message.text != backtext):
+        try:
+            item = message.text.split(".")[0]
+            date = message.text.split(".")[1]
+            time = message.text.split(".")[2]
+            if(date[0] == ' '):
+                date = date[1:]
+            if(time[0] == ' '):
+                time = time[1:]
+            sql.execute(
+                f"SELECT * FROM appointments WHERE date='{date}' AND time='{time}'")
+            print("SUCH")
+            if sql.fetchone() is None:
+                bot.send_message(message.chat.id, text="Что то пошло не так")
+                mainMenuBack()
+            else:
+                iid = 0
+                ourapps = []
+                for val in sql.execute(f"SELECT * FROM appointments WHERE date='{date}' AND time='{time}'"):
+                    ourapps.append(val)
+                for sqlo in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
+                    iid = sqlo[0]
+                for val in ourapps:
+                    if(iid == val[1] and date == val[3] and time == val[5] and val[7] == 0):
+                        print("calncel: ", val)
+                        appid = val[0]
+                        sql.execute(
+                            f"UPDATE appointments SET cancelled=1 WHERE id='{appid}'")
+                        db.commit()
+                        bot.send_message(
+                            message.chat.id, text="Запись отменена")
+                        mainMenuBackBack(message)
+        except:
+            mainMenuBackBack(message)
+    else:
+        mainMenuBackBack(message)
 
 
 def authSuperAdmin(id, message):
@@ -145,11 +155,12 @@ def mainMenuBack():
     btn5 = types.KeyboardButton(btn5txt[0])
     btn6 = types.KeyboardButton(btnRename)
     btn7 = types.KeyboardButton(my)
+    btn8 = types.KeyboardButton(cancelBtn)
     markup.row(btn1)
     markup.row(btn2, btn3)
     markup.row(btn7)
     markup.row(btn4, btn5)
-    markup.row(btn6)
+    markup.row(btn6, btn8)
     return markup
 
 
@@ -349,6 +360,7 @@ def cancelPre(message):
             for sqlo in sql.execute(f"SELECT * FROM items WHERE id={iid}"):
                 markup.add(types.KeyboardButton(
                     text=str(sqlo[1]) + ". " + str(val[3]) + ". " + str(val[5]) + '.'))
+        markup.add(backtext)
         bot.send_message(
             message.chat.id, text="Какую из записей Вы хотите отменить?", reply_markup=markup)
         ms = bot.register_next_step_handler(message, cancel)
@@ -852,9 +864,12 @@ def timecheck(message, time, itemtext, oldms, eq):
 
 
 def buy(message, time, itemtext, timed, eq, oldms):
-    bot.send_message(message.chat.id, "Есть ли какие то комментарии?")
-    bot.register_next_step_handler(
-        message, commentRet, time, itemtext, timed, eq, oldms, message.text)
+    if(message.text == backtext):
+        mainMenuBackBack(message)
+    else:
+        bot.send_message(message.chat.id, "Есть ли какие то комментарии?")
+        bot.register_next_step_handler(
+            message, commentRet, time, itemtext, timed, eq, oldms, message.text)
 
 
 def commentRet(message, time, itemtext, timed, eq, oldms, oldoldms):
