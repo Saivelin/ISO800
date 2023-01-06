@@ -395,7 +395,7 @@ def func(message):
             bot.register_next_step_handler(msg, userRename)
         else:
             bot.send_message(
-                message.chat.id, text="Похоже, что-то пошло не так( Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
+                message.chat.id, text="Похоже, что-то пошло не так (Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
 
     elif(message.text == "Получить записи по номеру"):
         sup = authSuperAdmin(message=message, id=message.from_user.id)
