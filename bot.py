@@ -216,7 +216,6 @@ def start(message):
 
 
 def authCheckUser(message):
-    print("auth")
     userid = message.from_user.id
     # print(userid)  # 852191502
     chatId = -1001595345813
@@ -476,7 +475,7 @@ def func(message):
                                     baddates.append(date)
                                 else:
                                     try:
-                                        print('x')
+                                        pass
                                         # dates.remove(date)
                                         # baddates.append(date)
                                     except:
@@ -582,7 +581,7 @@ def cal(c):
                                 baddates.append(date)
                             else:
                                 try:
-                                    print('x')
+                                    pass
                                     # dates.remove(date)
                                     # baddates.append(date)
                                 except:
@@ -783,20 +782,21 @@ def timecheck(message, time, itemtext, oldms, eq):
 
 
 def buy(message, time, itemtext, timed, eq, oldms):
-    print(eq)
-    print(oldms)
+    bot.send_message(message.chat.id, "Есть ли какие то комментарии?")
+    bot.register_next_step_handler(
+        message, commentRet, time, itemtext, timed, eq, oldms, message.text)
 
-    if(message.text == backtext):
+
+def commentRet(message, time, itemtext, timed, eq, oldms, oldoldms):
+    if(oldoldms == backtext):
         mainMenuBack()
         return False
-    print(itemtext)
     if(timed == False):
-        itemtext = message.text
+        itemtext = oldoldms
     else:
         bot.send_message(message.chat.id, text=itemtext)
     if(eq == True):
         itemtext = oldms
-    print(itemtext)
     bot.send_message(message.chat.id, text=itemtext)
     item = itemtext.split("Снять")[1].split(".")[0]
     date = itemtext.split("На")[1]
@@ -817,8 +817,8 @@ def buy(message, time, itemtext, timed, eq, oldms):
     sql.execute(
         f"SELECT * FROM appointments WHERE date='{date}' AND itemid={itemid}")
     if sql.fetchone() is None:
-        bot.send_message(message.chat.id, text=message.text + " buy")
-        date += ". Время записи: " + str(message.text)
+        bot.send_message(message.chat.id, text=oldoldms + " buy")
+        date += ". Время записи: " + str(oldoldms)
         # bot.send_message(message.chat.id,
         #                  "Real cards won't work with me, no money will be debited from your account."
         #                  " Use this test card number to pay for your Time Machine: `4242 4242 4242 4242`"
@@ -840,7 +840,8 @@ def buy(message, time, itemtext, timed, eq, oldms):
             photo_size=512,
             is_flexible=False,  # True If you need to set up Shipping Fee
             start_parameter='time-machine-example')
-        bot.register_next_step_handler(message, pay, item, date, pr)
+        bot.register_next_step_handler(
+            message, pay, item, date, pr, message.text)
         # i = pay(message=message, item=item, date=date)
         # if(i == True):
         # return True
@@ -849,7 +850,7 @@ def buy(message, time, itemtext, timed, eq, oldms):
             message.chat.id, text="Здесь уже занято. Попробуй выбрать другую дату")
 
 
-def pay(message, item, date, price):
+def pay(message, item, date, price, comment):
     if(message.text == backtext):
         mainMenuBack()
         return False
@@ -869,12 +870,10 @@ def pay(message, item, date, price):
         bot.send_message(message.chat.id, text=item)
         datereal = date.split(".")[0].replace(' ', '')
         time = date.split("Время записи: ")[1]
-        print(date.split(".")[0])
-        print(date.split("-")[1])
         item = " ".join(item.split())
         for res in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
-            sql.execute("INSERT INTO appointments(itemid, userid, 'date', price, 'time') VALUES (?, ?, ?, ?, ?)",
-                        (res[0], message.from_user.id, datereal, price, time))
+            sql.execute("INSERT INTO appointments(itemid, userid, 'date', price, 'time', 'comment') VALUES (?, ?, ?, ?, ?, ?)",
+                        (res[0], message.from_user.id, datereal, price, time, comment))
             db.commit()
             bot.send_message(message.chat.id, text="Вы записаны",
                              reply_markup=mainMenuBack())
