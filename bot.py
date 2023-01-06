@@ -30,6 +30,7 @@ btn5txt = ['УСЛУГИ', ['Создание ролика под ключ', 'Р
 btn3txt = ['КИНОВЕЧЕРА И РАЗВЛЕЧЕНИЯ', ['Посиделки и киновечера часовой доступ в пространство 200 рублей, в момент киновечера 300 рублей',
                                         'Зона PS5 (300 рублей в час)', 'Зона VR (500 рублей в час)', 'Фотозона (500 рублей 30 мин)']]
 btnRename = 'Изменить имя'
+cancelBtn = "Отменить запись"
 my = "Мои записи"
 reanameTxt = 'Окей. Напиши имя, на которое ты хочешь поменять свое'
 
@@ -83,6 +84,41 @@ def authorization(phone, message):
     else:
         for value in sql.execute(f"SELECT * FROM users WHERE id={message.from_user.id}"):
             return [True, value[2]]
+
+
+def cancel(message):
+    item = message.text.split(".")[0]
+    date = message.text.split(".")[1]
+    time = message.text.split(".")[2]
+    print(item)
+    bot.send_message(message.chat.id, text=item)
+    print(date)
+    bot.send_message(message.chat.id, text=date)
+    print(time)
+    bot.send_message(message.chat.id, text=time)
+    if(date[0] == ' '):
+        date = date[1:]
+    if(time[0] == ' '):
+        time = time[1:]
+    sql.execute(
+        f"SELECT * FROM appointments WHERE date='{date}' AND time='{time}'")
+    print("SUCH")
+    if sql.fetchone() is None:
+        bot.send_message(message.chat.id, text="Что то пошло не так")
+    else:
+        iid = 0
+        ourapps = []
+        for val in sql.execute(f"SELECT * FROM appointments WHERE date='{date}' AND time='{time}'"):
+            ourapps.append(val)
+        for sqlo in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
+            iid = sqlo[0]
+        for val in ourapps:
+            if(iid == val[1] and date == val[3] and time == val[5] and val[7] == 0):
+                print("calncel: ", val)
+                appid = val[0]
+                sql.execute(
+                    f"UPDATE appointments SET cancelled=1 WHERE id='{appid}'")
+                db.commit()
 
 
 def authSuperAdmin(id, message):
@@ -247,7 +283,8 @@ def contact(message):
             if(sup == False):
                 if req[0] == True:
                     bot.send_message(message.chat.id, text="Да, вижу тебя")
-                    bot.send_message(message.chat.id, text=f"Привет, {req[1]}")
+                    bot.send_message(
+                        message.chat.id, text=f"Привет, {req[1]}")
                 else:
                     bot.send_message(
                         message.chat.id, text="Не вижу тебя, заношу в бд")
@@ -289,6 +326,32 @@ def searchAppointmentsForPhone(message):
             mes += f"\n{itemsnames[i]} {reses[i][3]}"
             i += 1
         bot.send_message(message.chat.id, text=mes)
+
+
+def cancelPre(message):
+    sql.execute("SELECT * FROM items")
+    if sql.fetchone() is None:
+        print('none')
+    else:
+        print('fdf')
+    sql.execute(
+        f"SELECT * FROM appointments WHERE userid={message.from_user.id} AND cancelled=0")
+    if sql.fetchone() is None:
+        bot.send_message(
+            message.chat.id, text="У Вас сейчас нет записей")
+    else:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        vals = []
+        for val in sql.execute(f"SELECT * FROM appointments WHERE userid={message.from_user.id} AND cancelled=0"):
+            vals.append(val)
+        for val in vals:
+            iid = val[1]
+            for sqlo in sql.execute(f"SELECT * FROM items WHERE id={iid}"):
+                markup.add(types.KeyboardButton(
+                    text=str(sqlo[1]) + ". " + str(val[3]) + ". " + str(val[5]) + '.'))
+        bot.send_message(
+            message.chat.id, text="Какую из записей Вы хотите отменить?", reply_markup=markup)
+        ms = bot.register_next_step_handler(message, cancel)
 
 
 @ bot.message_handler(content_types=['text'])
@@ -370,6 +433,13 @@ def func(message):
         if(sup == True):
             bot.send_message(message.chat.id, text="Мне нужен его телефон")
             bot.register_next_step_handler(message, addAdmin)
+    elif(message.text == cancelBtn):
+        authorization = authCheckUser(message=message)
+        if(authorization == True):
+            cancelPre(message)
+        else:
+            bot.send_message(
+                message.chat.id, text="Похоже, что-то пошло не так( Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
     elif(message.text == my):
         authorization = authCheckUser(message=message)
         if(authorization == True):
