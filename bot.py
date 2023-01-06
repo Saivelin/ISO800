@@ -87,38 +87,38 @@ def authorization(phone, message):
 
 
 def cancel(message):
-    item = message.text.split(".")[0]
-    date = message.text.split(".")[1]
-    time = message.text.split(".")[2]
-    print(item)
-    bot.send_message(message.chat.id, text=item)
-    print(date)
-    bot.send_message(message.chat.id, text=date)
-    print(time)
-    bot.send_message(message.chat.id, text=time)
-    if(date[0] == ' '):
-        date = date[1:]
-    if(time[0] == ' '):
-        time = time[1:]
-    sql.execute(
-        f"SELECT * FROM appointments WHERE date='{date}' AND time='{time}'")
-    print("SUCH")
-    if sql.fetchone() is None:
-        bot.send_message(message.chat.id, text="Что то пошло не так")
-    else:
-        iid = 0
-        ourapps = []
-        for val in sql.execute(f"SELECT * FROM appointments WHERE date='{date}' AND time='{time}'"):
-            ourapps.append(val)
-        for sqlo in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
-            iid = sqlo[0]
-        for val in ourapps:
-            if(iid == val[1] and date == val[3] and time == val[5] and val[7] == 0):
-                print("calncel: ", val)
-                appid = val[0]
-                sql.execute(
-                    f"UPDATE appointments SET cancelled=1 WHERE id='{appid}'")
-                db.commit()
+    try:
+        item = message.text.split(".")[0]
+        date = message.text.split(".")[1]
+        time = message.text.split(".")[2]
+        if(date[0] == ' '):
+            date = date[1:]
+        if(time[0] == ' '):
+            time = time[1:]
+        sql.execute(
+            f"SELECT * FROM appointments WHERE date='{date}' AND time='{time}'")
+        print("SUCH")
+        if sql.fetchone() is None:
+            bot.send_message(message.chat.id, text="Что то пошло не так")
+            mainMenuBack()
+        else:
+            iid = 0
+            ourapps = []
+            for val in sql.execute(f"SELECT * FROM appointments WHERE date='{date}' AND time='{time}'"):
+                ourapps.append(val)
+            for sqlo in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
+                iid = sqlo[0]
+            for val in ourapps:
+                if(iid == val[1] and date == val[3] and time == val[5] and val[7] == 0):
+                    print("calncel: ", val)
+                    appid = val[0]
+                    sql.execute(
+                        f"UPDATE appointments SET cancelled=1 WHERE id='{appid}'")
+                    db.commit()
+                    bot.send_message(message.chat.id, text="Запись отменена")
+                    mainMenuBack()
+    except:
+        mainMenuBack()
 
 
 def authSuperAdmin(id, message):
@@ -315,7 +315,7 @@ def searchAppointmentsForPhone(message):
         mes = ''
         for value in sql.execute(f"SELECT * FROM users WHERE phone='{phone}'"):
             id = value[0]
-        for value in sql.execute(f"SELECT * FROM appointments WHERE userid='{id}'"):
+        for value in sql.execute(f"SELECT * FROM appointments WHERE userid='{id}' AND cancelled=0"):
             reses.append(value)
         for value in reses:
             iid = value[1]
@@ -446,7 +446,7 @@ def func(message):
             mes = ''
             reses = []
             for res in sql.execute(
-                    f"SELECT * FROM appointments WHERE userid={message.from_user.id}"):
+                    f"SELECT * FROM appointments WHERE userid={message.from_user.id} AND cancelled=0"):
                 reses.append(res)
             for res in reses:
                 for val in sql.execute(f"SELECT * FROM items WHERE id={res[1]}"):
@@ -504,7 +504,7 @@ def func(message):
                              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
                     iid = value[0]
                     sql.execute(
-                        f"SELECT * FROM appointments WHERE itemid='{iid}'")
+                        f"SELECT * FROM appointments WHERE itemid='{iid}' AND cancelled=0")
                     data = json.loads(calendar)
                     calendar = json.loads(calendar)
                     mn = 0
@@ -535,12 +535,12 @@ def func(message):
                     baddates = []
                     for date in dates:
                         sql.execute(
-                            f"SELECT * FROM appointments WHERE itemid='{iid}'")
+                            f"SELECT * FROM appointments WHERE itemid='{iid}' AND cancelled=0")
                         if sql.fetchone() is None:
                             dates = []
                         else:
                             for sqlV in sql.execute(
-                                    f"SELECT * FROM appointments WHERE itemid='{iid}'"):
+                                    f"SELECT * FROM appointments WHERE itemid='{iid}' AND cancelled=0"):
                                 if (daten + str(date)).replace(' ', '') == (sqlV[3].split('.')[0]).replace(' ', ''):
                                     baddates.append(date)
                                 else:
@@ -611,7 +611,7 @@ def cal(c):
                          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
                 iid = value[0]
                 sql.execute(
-                    f"SELECT * FROM appointments WHERE itemid='{iid}'")
+                    f"SELECT * FROM appointments WHERE itemid='{iid}' AND cancelled=0")
                 data = json.loads(calendar)
                 calendar = json.loads(calendar)
                 mn = 0
@@ -641,12 +641,12 @@ def cal(c):
                 baddates = []
                 for date in dates:
                     sql.execute(
-                        f"SELECT * FROM appointments WHERE itemid='{iid}'")
+                        f"SELECT * FROM appointments WHERE itemid='{iid}' AND cancelled=0")
                     if sql.fetchone() is None:
                         dates = []
                     else:
                         for sqlV in sql.execute(
-                                f"SELECT * FROM appointments WHERE itemid='{iid}'"):
+                                f"SELECT * FROM appointments WHERE itemid='{iid}' AND cancelled=0"):
                             if (daten + str(date)).replace(' ', '') == (sqlV[3]):
                                 baddates.append(date)
                             else:
@@ -757,7 +757,7 @@ def timecheck(message, time, itemtext, oldms, eq):
             iid = val[0]
         bot.send_message(
             message.chat.id, text=f"iid: {iid}, reqtext: {reqtext}")
-        for val in sql.execute(f"SELECT * FROM appointments WHERE itemid='{iid}'"):
+        for val in sql.execute(f"SELECT * FROM appointments WHERE itemid='{iid}' AND cancelled=0"):
             if (val[3].split(".")[0]).replace(" ", "") == dateMy.replace(" ", ""):
                 badtimes.append(val[5])
         if(time == 1):
@@ -885,7 +885,7 @@ def commentRet(message, time, itemtext, timed, eq, oldms, oldoldms):
         if itemdesc == None:
             itemdesc = ''
     sql.execute(
-        f"SELECT * FROM appointments WHERE date='{date}' AND itemid={itemid}")
+        f"SELECT * FROM appointments WHERE date='{date}' AND itemid={itemid} AND cancelled=0")
     if sql.fetchone() is None:
         bot.send_message(message.chat.id, text=oldoldms + " buy")
         date += ". Время записи: " + str(oldoldms)
