@@ -872,6 +872,61 @@ def buy(message, time, itemtext, timed, eq, oldms):
     if(message.text == backtext):
         mainMenuBackBack(message)
     else:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.add(types.KeyboardButton("Нет"))
+
+        date = itemtext.split(".")[1].split("На ")[1]
+        item = itemtext.split('.')[0].split("Снять ")[1]
+        iid = 0
+        bot.send_message(message.chat.id, text=item)
+        sql.execute(f"SELECT * FROM items WHERE title='{item}'")
+        if sql.fetchone() is None:
+            print(f"No such item with name: {item}")
+        else:
+            for val in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
+                iid = val[0]
+        print(iid, date)
+        sql.execute(
+            f"SELECT * FROM appointments WHERE itemid='{iid}' AND date='{date}'")
+        if sql.fetchone() is None:
+            print("none")
+            h = (message.text).split(":")
+            print(h)
+            hmax = 24 - int(h)
+            print(hmax)
+            if(hmax == 1):
+                hmax = 0
+        else:
+            print("yes")
+            h = int((message.text).split(":")[0])
+            print(h)
+            hmax = 23 - h
+            print(hmax)
+            badtimes = []
+            for val in sql.execute(f"SELECT * FROM appointments WHERE itemid='{iid}' AND date='{date}'"):
+                if(int(val[5].split(":")[0]) >= int(h)):
+                    badtimes.append(val[5])
+            st = False
+            mar = []
+            print(badtimes)
+            for val in range(h, 24):
+                if(st == False):
+                    for value in badtimes:
+                        if(st == False):
+                            if (int(value.split(":")[0]) == int(val)):
+                                print("iet bad")
+                                st = True
+                            else:
+                                print("iet good")
+                                if h != int(value.split(":")[0]):
+                                    mar.append(str(val) + ":00")
+            print(mar)
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            for val in mar:
+                markup.add(val)
+        print(date)
+        bot.send_message(
+            message.chat.id, "Может хотите добавить времени?", reply_markup=markup)
         bot.send_message(message.chat.id, "Есть ли какие то комментарии?")
         bot.register_next_step_handler(
             message, commentRet, time, itemtext, timed, eq, oldms, message.text)
