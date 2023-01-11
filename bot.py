@@ -233,9 +233,13 @@ def userCheck(message):
 
 
 def userRename(message):
-    sql.execute(
-        f"UPDATE users SET name='{message.text}' WHERE id='{message.from_user.id}'")
-    db.commit()
+    if(message.text == backtext):
+        mainMenuBackBack(message=message)
+        return False
+    else:
+        sql.execute(
+            f"UPDATE users SET name='{message.text}' WHERE id='{message.from_user.id}'")
+        db.commit()
 
 
 def userGetName(message):
@@ -471,13 +475,14 @@ def func(message):
     elif(message.text == btnRename):
         authorization = authCheckUser(message=message)
         if(authorization == True):
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            markup.add(types.KeyboardButton(backtext))
             msg = bot.send_message(message.chat.id, text='Окей, ' +
-                                   userGetName(message=message)[1] + '. Какое имя ты хочешь?')
+                                   userGetName(message=message)[1] + '. Какое имя ты хочешь?', reply_markup=markup)
             bot.register_next_step_handler(msg, userRename)
         else:
             bot.send_message(
                 message.chat.id, text="Похоже, что-то пошло не так (Возможно Вы еще не зарегестрированы? Если это так, то пропишите мне /start и я проинструктирую Вас)")
-
     elif(message.text == "Получить записи по номеру"):
         sup = authSuperAdmin(message=message, id=message.from_user.id)
         if(sup == True):
