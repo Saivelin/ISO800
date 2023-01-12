@@ -873,7 +873,6 @@ def buy(message, time, itemtext, timed, eq, oldms):
         mainMenuBackBack(message)
     else:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(types.KeyboardButton("Нет"))
 
         date = itemtext.split(".")[1].split("На ")[1]
         item = itemtext.split('.')[0].split("Снять ")[1]
@@ -890,12 +889,58 @@ def buy(message, time, itemtext, timed, eq, oldms):
             f"SELECT * FROM appointments WHERE itemid='{iid}' AND date='{date}'")
         if sql.fetchone() is None:
             print("none")
-            h = (message.text).split(":")
+            h = int((message.text).split(":")[0])
             print(h)
-            hmax = 24 - int(h)
+            hmax = 23 - h
             print(hmax)
-            if(hmax == 1):
-                hmax = 0
+            badtimes = []
+            for val in sql.execute(f"SELECT * FROM appointments WHERE itemid='{iid}' AND date='{date}'"):
+                if(int(val[5].split(":")[0]) >= int(h)):
+                    badtimes.append(val[5])
+            st = False
+            mar = []
+            print(badtimes)
+            for val in range(h, 24):
+                if(st == False):
+                    if(len(badtimes) > 0):
+                        for value in badtimes:
+                            if(st == False):
+                                print(h)
+                                print(value)
+                                print(int(value.split(":")[0]))
+                                print(val)
+                                if(h != val):
+                                    if (int(value.split(":")[0]) == int(val)):
+                                        print("iet bad")
+                                        st = True
+                                    else:
+                                        print("iet good")
+                                        if h != int(value.split(":")[0]):
+                                            mar.append(str(val) + ":00")
+                    else:
+                        if(h != val):
+                            if(st == False):
+                                mar.append((str(val) + ":00"))
+            print(mar)
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            markup.add(types.KeyboardButton("Нет"))
+            # for val in mar:
+            #     markup.add(val)
+            i = 0
+            while i < len(mar):
+                # print(btnsarr[i].text, btnsarr[i+1].text, btnsarr[i+2].text)
+                if ((len(mar))) % 3 != 0 and i+3 > len(mar):
+                    if((len(mar)+1) % 3 == 1):
+                        markup.row(mar[i])
+                    else:
+                        try:
+                            markup.row(mar[i], mar[i+1])
+                        except:
+                            markup.row(mar[i])
+                else:
+                    markup.row(mar[i], mar[i+1], mar[i+2])
+                i += 3
+            markup.add(types.KeyboardButton(backtext))
         else:
             print("yes")
             h = int((message.text).split(":")[0])
@@ -911,19 +956,45 @@ def buy(message, time, itemtext, timed, eq, oldms):
             print(badtimes)
             for val in range(h, 24):
                 if(st == False):
-                    for value in badtimes:
-                        if(st == False):
-                            if (int(value.split(":")[0]) == int(val)):
-                                print("iet bad")
-                                st = True
-                            else:
-                                print("iet good")
-                                if h != int(value.split(":")[0]):
-                                    mar.append(str(val) + ":00")
+                    if(len(badtimes) > 0):
+                        for value in badtimes:
+                            if(st == False):
+                                print(h)
+                                print(value)
+                                print(int(value.split(":")[0]))
+                                print(val)
+                                if(h != val):
+                                    if (int(value.split(":")[0]) == int(val)):
+                                        print("iet bad")
+                                        st = True
+                                    else:
+                                        print("iet good")
+                                        if h != int(value.split(":")[0]):
+                                            mar.append(str(val) + ":00")
+                    else:
+                        if(h != val):
+                            if(st == False):
+                                mar.append((str(val) + ":00"))
             print(mar)
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            for val in mar:
-                markup.add(val)
+            markup.add(types.KeyboardButton("Нет"))
+            # for val in mar:
+            #     markup.add(val)
+            i = 0
+            while i < len(mar):
+                # print(btnsarr[i].text, btnsarr[i+1].text, btnsarr[i+2].text)
+                if ((len(mar))) % 3 != 0 and i+3 > len(mar):
+                    if((len(mar)+1) % 3 == 1):
+                        markup.row(mar[i])
+                    else:
+                        try:
+                            markup.row(mar[i], mar[i+1])
+                        except:
+                            markup.row(mar[i])
+                else:
+                    markup.row(mar[i], mar[i+1], mar[i+2])
+                i += 3
+            markup.add(types.KeyboardButton(backtext))
         print(date)
         bot.send_message(
             message.chat.id, "Может хотите добавить времени?", reply_markup=markup)
