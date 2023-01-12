@@ -998,12 +998,20 @@ def buy(message, time, itemtext, timed, eq, oldms):
         print(date)
         bot.send_message(
             message.chat.id, "Может хотите добавить времени?", reply_markup=markup)
+        bot.register_next_step_handler(
+            message, commentRet, time, itemtext, timed, eq, oldms, message.text)
+
+
+def addtime(message, time, itemtext, timed, eq, oldms, oldoldms):
+    try:
+        int((message.text).split(":")[0])
+    except:
         bot.send_message(message.chat.id, "Есть ли какие то комментарии?")
         bot.register_next_step_handler(
             message, commentRet, time, itemtext, timed, eq, oldms, message.text)
 
 
-def commentRet(message, time, itemtext, timed, eq, oldms, oldoldms):
+def commentRet(message, time, itemtext, timed, eq, oldms, oldoldms, adedtime):
     if(oldoldms == backtext):
         mainMenuBack()
         return False
