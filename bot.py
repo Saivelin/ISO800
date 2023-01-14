@@ -77,8 +77,8 @@ class MyStyleCalendar(DetailedTelegramCalendar):
 def authorization(phone, message):
     sql.execute(f"SELECT * FROM users WHERE id={message.from_user.id}")
     if sql.fetchone() is None:
-        sql.execute("INSERT INTO users VALUES (?, ?, ?)",
-                    (message.from_user.id, phone.phone_number, phone.first_name))
+        sql.execute("INSERT INTO users VALUES (?, ?, ?, ?)",
+                    (message.from_user.id, phone.phone_number, phone.first_name, "Новый пользователь"))
         db.commit()
         return [False, phone.first_name]
     else:
@@ -119,9 +119,14 @@ def cancel(message):
                     if(iid == val[1] and date == val[3] and time == val[5] and val[7] == 0):
                         print("calncel: ", val)
                         appid = val[0]
+                        for valuede in sql.execute(f"SELECT * FROM appointments WHERE id='{appid}'"):
+                            print(valuede)
+                        print(appid)
+                        appid = str(appid)
                         sql.execute(
                             f"UPDATE appointments SET cancelled=1 WHERE id='{appid}'")
                         db.commit()
+                        print("РАБОТАЮ")
                         bot.send_message(
                             message.chat.id, text="Запись отменена")
                         mainMenuBackBack(message)
@@ -133,9 +138,11 @@ def cancel(message):
 
 def authSuperAdmin(id, message):
     sql.execute(f"SELECT * FROM superadmins WHERE id='{id}'")
+    print(id)
     if sql.fetchone() is None:
         return False
     else:
+        print("super")
         return True
 
 
@@ -292,7 +299,10 @@ def contact(message):
         print(result.status)
         if(result.status == "member" or result.status == "administrator" or result.status == "creator"):
             bot.send_message(message.chat.id, text="Смотрю...")
-            req = authorization(message=message, phone=message.contact)
+            try:
+                req = authorization(message=message, phone=message.contact)
+            except:
+                sup = authSuperAdmin(id=message.from_user.id, message=message)
             sup = authSuperAdmin(id=message.from_user.id, message=message)
             # adm = adminAuth(message, message.contact)
             if(sup == False):
@@ -314,6 +324,7 @@ def contact(message):
             bot.send_message(
                 message.chat.id, text="Ты наверно еще не в нашем канале. Подпишись и заходи ко мне) https://t.me/iso800nn")
     except:
+        print("FUCKING ERROR")
         bot.send_message(
             message.chat.id, text="Ты наверно еще не в нашем канале. Подпишись и заходи ко мне) https://t.me/iso800nn")
 
@@ -470,8 +481,14 @@ def func(message):
                 reses.append(res)
             for res in reses:
                 for val in sql.execute(f"SELECT * FROM items WHERE id={res[1]}"):
-                    mes += f"\n" + str(val[1]) + " " + \
-                        str(val[2]) + ' - ' + str(res[3])
+                    if(res[8] != "Нет"):
+                        mes += f"\n" + str(val[1]) + " " + \
+                            str(val[2]) + "₽" + ' - ' + str(res[3]) + \
+                            ". " + str(res[5]) + " - " + str(res[8])
+                    else:
+                        mes += f"\n" + str(val[1]) + " " + \
+                            str(val[2]) + "₽" + ' - ' + str(res[3]) + \
+                            ". " + str(res[5]) + "."
             bot.send_message(message.chat.id, text=mes)
         else:
             bot.send_message(
@@ -976,16 +993,10 @@ def buy(message, time, itemtext, timed, eq, oldms):
                     if(len(badtimes) > 0):
                         for value in badtimes:
                             if(st == False):
-                                print(h)
-                                print(value)
-                                print(int(value.split(":")[0]))
-                                print(val)
                                 if(h != val):
                                     if (int(value.split(":")[0]) == int(val)):
-                                        print("iet bad")
                                         st = True
                                     else:
-                                        print("iet good")
                                         if h != int(value.split(":")[0]):
                                             mar.append(str(val) + ":00")
                     else:
@@ -1022,6 +1033,7 @@ def buy(message, time, itemtext, timed, eq, oldms):
 def addtime(message, time, itemtext, timed, eq, oldms, oldoldms):
     try:
         int((message.text).split(":")[0])
+        bot.send_message(message.chat.id, "Есть ли какие то комментарии?")
         bot.register_next_step_handler(
             message, commentRet, time, itemtext, timed, eq, oldms, oldoldms, message.text)
     except:
@@ -1070,7 +1082,12 @@ def commentRet(message, time, itemtext, timed, eq, oldms, oldoldms, adedtime):
         #                  " Use this test card number to pay for your Time Machine: `4242 4242 4242 4242`"
         #                  "\n\nThis is your demo invoice:", parse_mode='Markdown')
         pr = int(pr) * 100
-        pr = pr * (int(adedtime.split(":")[0]) - int(oldoldms.split(":")[0]))
+        print(oldoldms.split(":")[0])
+        if(adedtime == "Нет"):
+            pr = pr
+        else:
+            pr = pr * (int(adedtime.split(":")[0]) -
+                       int(oldoldms.split(":")[0]) + 1)
         prices = [LabeledPrice(
             label=item, amount=int(pr))]
         bot.send_invoice(
