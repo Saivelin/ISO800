@@ -362,8 +362,12 @@ def cancelPre(message):
         for val in vals:
             iid = val[1]
             for sqlo in sql.execute(f"SELECT * FROM items WHERE id={iid}"):
-                markup.add(types.KeyboardButton(
-                    text=str(sqlo[1]) + ". " + str(val[3]) + ". " + str(val[5]) + '.'))
+                if(val[8] == "Нет"):
+                    markup.add(types.KeyboardButton(
+                        text=str(sqlo[1]) + ". " + str(val[3]) + ". " + str(val[5]) + '.'))
+                else:
+                    markup.add(types.KeyboardButton(
+                        text=str(sqlo[1]) + ". " + str(val[3]) + ". " + str(val[5]) + ". До " + str(val[8]) + '.'))
         markup.add(backtext)
         bot.send_message(
             message.chat.id, text="Какую из записей Вы хотите отменить?", reply_markup=markup)
@@ -777,6 +781,9 @@ def timecheck(message, time, itemtext, oldms, eq):
         for val in sql.execute(f"SELECT * FROM appointments WHERE itemid='{iid}' AND cancelled=0"):
             if (val[3].split(".")[0]).replace(" ", "") == dateMy.replace(" ", ""):
                 badtimes.append(val[5])
+            if(val[8] != "Нет"):
+                for valueSec in range(int(val[5].split(":")[0]), int(val[8].split(":")[0]) + 1):
+                    badtimes.append(str(valueSec) + ":00")
         if(time == 1):
             bot.send_message(message.chat.id, text=message.text)
             bot.send_message(message.chat.id, text=itemtext)
@@ -951,6 +958,16 @@ def buy(message, time, itemtext, timed, eq, oldms):
             for val in sql.execute(f"SELECT * FROM appointments WHERE itemid='{iid}' AND date='{date}'"):
                 if(int(val[5].split(":")[0]) >= int(h)):
                     badtimes.append(val[5])
+                try:
+                    print(val[8])
+                    print(int(val[8].split(":")[0]))
+                    if(int(val[8].split(":")[0]) >= int(val[5].split(":")[0])):
+                        print("vals")
+                        for vals in range(int(val[5].split(":")[0]), int(val[8].split(":")[0])):
+                            print("vals: ", vals)
+                            badtimes.append(str(vals) + ":00")
+                except:
+                    print("OK")
             st = False
             mar = []
             print(badtimes)
@@ -999,16 +1016,19 @@ def buy(message, time, itemtext, timed, eq, oldms):
         bot.send_message(
             message.chat.id, "Может хотите добавить времени?", reply_markup=markup)
         bot.register_next_step_handler(
-            message, commentRet, time, itemtext, timed, eq, oldms, message.text)
+            message, addtime, time, itemtext, timed, eq, oldms, message.text)
 
 
 def addtime(message, time, itemtext, timed, eq, oldms, oldoldms):
     try:
         int((message.text).split(":")[0])
-    except:
-        bot.send_message(message.chat.id, "Есть ли какие то комментарии?")
         bot.register_next_step_handler(
-            message, commentRet, time, itemtext, timed, eq, oldms, message.text)
+            message, commentRet, time, itemtext, timed, eq, oldms, oldoldms, message.text)
+    except:
+        if(message.text == "Нет"):
+            bot.send_message(message.chat.id, "Есть ли какие то комментарии?")
+            bot.register_next_step_handler(
+                message, commentRet, time, itemtext, timed, eq, oldms, oldoldms, "Нет")
 
 
 def commentRet(message, time, itemtext, timed, eq, oldms, oldoldms, adedtime):
@@ -1032,6 +1052,8 @@ def commentRet(message, time, itemtext, timed, eq, oldms, oldoldms, adedtime):
     bot.send_message(message.chat.id, text=item)
     itemdesc = ''
     itemimg = ''
+    if(adedtime != "Нет"):
+        print(int(adedtime.split(":")[0]) - int(oldoldms.split(":")[0]))
     for res in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
         itemimg = res[6]
         itemid = res[0]
@@ -1048,6 +1070,7 @@ def commentRet(message, time, itemtext, timed, eq, oldms, oldoldms, adedtime):
         #                  " Use this test card number to pay for your Time Machine: `4242 4242 4242 4242`"
         #                  "\n\nThis is your demo invoice:", parse_mode='Markdown')
         pr = int(pr) * 100
+        pr = pr * (int(adedtime.split(":")[0]) - int(oldoldms.split(":")[0]))
         prices = [LabeledPrice(
             label=item, amount=int(pr))]
         bot.send_invoice(
@@ -1065,7 +1088,7 @@ def commentRet(message, time, itemtext, timed, eq, oldms, oldoldms, adedtime):
             is_flexible=False,  # True If you need to set up Shipping Fee
             start_parameter='time-machine-example')
         bot.register_next_step_handler(
-            message, pay, item, date, pr, message.text)
+            message, pay, item, date, pr, message.text, adedtime)
         # i = pay(message=message, item=item, date=date)
         # if(i == True):
         # return True
@@ -1074,7 +1097,7 @@ def commentRet(message, time, itemtext, timed, eq, oldms, oldoldms, adedtime):
             message.chat.id, text="Здесь уже занято. Попробуй выбрать другую дату")
 
 
-def pay(message, item, date, price, comment):
+def pay(message, item, date, price, comment, adedtime):
     if(message.text == backtext):
         mainMenuBack()
         return False
@@ -1085,7 +1108,7 @@ def pay(message, item, date, price, comment):
     if(message.content_type == "successful_payment"):
         success = True
     else:
-        success = False
+        success = True  # !!!!!!!!!!!!!!!! ЭТО УБРАТЬ. ПОКА ЧТО ПЛАТЕЖИ НЕ РАБОТАЮТ. ПОТОМ ПОМЕНЯТЬ НА FALSE!!!!!!!!!!!!!!
     if(success == True):
         bot.send_message(
             message.chat.id, text=f"Вы успешно перевели {price}0 RUB для ISO800 за {item}")
@@ -1096,8 +1119,8 @@ def pay(message, item, date, price, comment):
         time = date.split("Время записи: ")[1]
         item = " ".join(item.split())
         for res in sql.execute(f"SELECT * FROM items WHERE title='{item}'"):
-            sql.execute("INSERT INTO appointments(itemid, userid, 'date', price, 'time', 'comment') VALUES (?, ?, ?, ?, ?, ?)",
-                        (res[0], message.from_user.id, datereal, price, time, comment))
+            sql.execute("INSERT INTO appointments(itemid, userid, 'date', price, 'time', 'comment', 'timeTo') VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        (res[0], message.from_user.id, datereal, price, time, comment, adedtime))
             db.commit()
             bot.send_message(message.chat.id, text="Вы записаны",
                              reply_markup=mainMenuBack())
