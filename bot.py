@@ -1116,7 +1116,7 @@ def commentRet(message, time, itemtext, timed, eq, oldms, oldoldms, adedtime):
 
 def pay(message, item, date, price, comment, adedtime):
     if(message.text == backtext):
-        mainMenuBack()
+        mainMenuBackBack(message)
         return False
     # PAYMENT
     price = price/100
@@ -1125,7 +1125,9 @@ def pay(message, item, date, price, comment, adedtime):
     if(message.content_type == "successful_payment"):
         success = True
     else:
-        success = True  # !!!!!!!!!!!!!!!! ЭТО УБРАТЬ. ПОКА ЧТО ПЛАТЕЖИ НЕ РАБОТАЮТ. ПОТОМ ПОМЕНЯТЬ НА FALSE!!!!!!!!!!!!!!
+        success = False  # !!!!!!!!!!!!!!!! ЭТО УБРАТЬ. ПОКА ЧТО ПЛАТЕЖИ НЕ РАБОТАЮТ. ПОТОМ ПОМЕНЯТЬ НА FALSE!!!!!!!!!!!!!!
+    if(authSuperAdmin(message.from_user.id, message)):
+        success = True
     if(success == True):
         bot.send_message(
             message.chat.id, text=f"Вы успешно перевели {price}0 RUB для ISO800 за {item}")
